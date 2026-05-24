@@ -1,0 +1,9 @@
+{
+  "name": "投資判断ログ・売買条件チェッカー",
+  "short_name": "投資判断",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#f4f6f8",
+  "theme_color": "#111827",
+  "lang": "ja-JP"
+}

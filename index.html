@@ -1,0 +1,5395 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="投資判断">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="theme-color" content="#111827">
+<link rel="manifest" href="manifest.webmanifest">
+<title>投資判断ログ・売買条件チェッカー v23 月表示完全修正版/iPhone</title>
+<style>
+  :root{
+    --bg:#f4f6f8;
+    --panel:#ffffff;
+    --ink:#1f2937;
+    --muted:#6b7280;
+    --line:#d1d5db;
+    --soft:#eef2f7;
+    --danger:#b91c1c;
+    --warn:#92400e;
+    --ok:#166534;
+    --blue:#1d4ed8;
+    --shadow:0 2px 10px rgba(15,23,42,.08);
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", "Meiryo", sans-serif;
+    background:var(--bg);
+    color:var(--ink);
+    font-size:14px;
+    line-height:1.5;
+  }
+  header{
+    background:#111827;
+    color:#fff;
+    padding:14px 18px;
+    position:sticky;
+    top:0;
+    z-index:20;
+    box-shadow:var(--shadow);
+  }
+  header h1{font-size:18px;margin:0 0 4px}
+  header .sub{font-size:12px;color:#cbd5e1}
+  main{max-width:1280px;margin:0 auto;padding:16px}
+  .notice{
+    background:#fff7ed;
+    border:1px solid #fed7aa;
+    color:#7c2d12;
+    padding:10px 12px;
+    border-radius:10px;
+    margin:0 0 14px;
+  }
+  .tabs{
+    display:flex;
+    gap:6px;
+    flex-wrap:wrap;
+    margin:0 0 14px;
+  }
+  .tab{
+    border:1px solid var(--line);
+    background:#fff;
+    color:#111827;
+    padding:9px 12px;
+    border-radius:10px;
+    cursor:pointer;
+    font-weight:600;
+  }
+  .tab.active{background:#111827;color:#fff;border-color:#111827}
+  section.panel{
+    display:none;
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:12px;
+    padding:14px;
+    box-shadow:var(--shadow);
+    margin-bottom:14px;
+  }
+  section.panel.active{display:block}
+  h2{font-size:17px;margin:0 0 12px}
+  h3{font-size:15px;margin:18px 0 8px}
+  .grid{display:grid;grid-template-columns:repeat(12,1fr);gap:10px}
+  .col-2{grid-column:span 2}
+  .col-3{grid-column:span 3}
+  .col-4{grid-column:span 4}
+  .col-5{grid-column:span 5}
+  .col-6{grid-column:span 6}
+  .col-8{grid-column:span 8}
+  .col-12{grid-column:span 12}
+  @media(max-width:900px){
+    .col-2,.col-3,.col-4,.col-5,.col-6,.col-8{grid-column:span 12}
+  }
+  label{display:block;font-weight:700;font-size:12px;color:#374151;margin-bottom:4px}
+  input,select,textarea{
+    width:100%;
+    border:1px solid var(--line);
+    border-radius:8px;
+    padding:8px 9px;
+    background:#fff;
+    color:#111827;
+    font:inherit;
+  }
+  textarea{min-height:72px;resize:vertical}
+  input[readonly]{background:#f3f4f6;color:#374151}
+  .btns{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}
+  button{
+    border:1px solid #111827;
+    background:#111827;
+    color:#fff;
+    border-radius:9px;
+    padding:8px 12px;
+    cursor:pointer;
+    font-weight:700;
+  }
+  button.secondary{background:#fff;color:#111827;border-color:var(--line)}
+  button.danger{background:#991b1b;border-color:#991b1b}
+  button.ok{background:#166534;border-color:#166534}
+  button.warn{background:#92400e;border-color:#92400e}
+  .cards{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:10px 0}
+  @media(max-width:900px){.cards{grid-template-columns:1fr}}
+  .card{
+    background:var(--soft);
+    border:1px solid var(--line);
+    border-radius:12px;
+    padding:12px;
+  }
+  .card .k{font-size:12px;color:var(--muted);font-weight:700}
+  .card .v{font-size:20px;font-weight:800;margin-top:3px}
+  .status{
+    display:inline-block;
+    padding:3px 8px;
+    border-radius:999px;
+    font-weight:800;
+    font-size:12px;
+  }
+  .status.ok{background:#dcfce7;color:var(--ok)}
+  .status.warn{background:#fef3c7;color:var(--warn)}
+  .status.danger{background:#fee2e2;color:var(--danger)}
+  .status.neutral{background:#e5e7eb;color:#374151}
+  table{width:100%;border-collapse:collapse;margin:8px 0;background:#fff}
+  th,td{border:1px solid var(--line);padding:7px;vertical-align:top}
+  th{background:#f3f4f6;text-align:left;font-size:12px}
+  td input,td select,td textarea{border:0;padding:4px;border-radius:4px;background:transparent}
+  td textarea{min-height:42px}
+  .resultBox{
+    border:1px solid var(--line);
+    background:#f9fafb;
+    border-radius:12px;
+    padding:12px;
+    margin:12px 0;
+    white-space:pre-wrap;
+  }
+  .small{font-size:12px;color:var(--muted)}
+  .right{text-align:right}
+  .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+  .checklist li{margin:3px 0}
+  .split{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  @media(max-width:900px){.split{grid-template-columns:1fr}}
+  .footerNote{font-size:12px;color:#6b7280;margin-top:12px}
+  .allocRow{display:grid;grid-template-columns:140px 1fr 120px;gap:8px;align-items:center;margin:8px 0}
+  .allocTrack{height:16px;background:#e5e7eb;border-radius:999px;overflow:hidden;border:1px solid #d1d5db}
+  .allocBar{height:100%;background:#111827;width:0%}
+  .warnText{color:#92400e;font-weight:700}
+  .dangerText{color:#b91c1c;font-weight:800}
+  .okText{color:#166534;font-weight:800}
+  .checkItem{display:flex;gap:8px;align-items:flex-start;margin:8px 0}
+  .checkItem input{width:auto;margin-top:3px}
+  .codebox{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;background:#111827;color:#f9fafb;border-radius:10px;padding:10px;white-space:pre-wrap}
+  .chartWrap{border:1px solid var(--line);border-radius:12px;background:#fff;padding:10px;margin:10px 0}
+  canvas.chartCanvas{width:100%;height:360px;display:block;background:#fff;border-radius:8px}
+  .techGrid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:10px 0}
+  @media(max-width:900px){.techGrid{grid-template-columns:1fr 1fr}}
+  .techTile{background:#f3f4f6;border:1px solid var(--line);border-radius:10px;padding:8px}
+  .techTile .k{font-size:12px;color:#6b7280;font-weight:700}
+  .techTile .v{font-size:16px;font-weight:800}
+</style>
+</head>
+<body>
+<header>
+  <h1>投資判断ログ・売買条件チェッカー v23 月表示完全修正版/iPhone</h1>
+  <div class="sub">自分専用の判断支援ツール。売買指示ではなく、事前条件・資金配分・リスク・判断ログを整理する。</div>
+</header>
+
+<main>
+  <div class="notice">
+    このアプリは投資助言ではない。価格・金利・為替・税制・手数料は手入力で確認する。最終判断は使用者が行う。
+    外部公開・販売・第三者への個別助言用途では、法規制の確認が必要。
+  </div>
+
+  <div class="tabs">
+    <button class="tab active" data-tab="dashboard">ダッシュボード</button>
+    <button class="tab" data-tab="quick">一画面運用</button>
+    <button class="tab" data-tab="assets">資産・市場入力</button>
+    <button class="tab" data-tab="api">API連携</button>
+    <button class="tab" data-tab="log">判断ログ</button>
+    <button class="tab" data-tab="settings">条件設定</button>
+  </div>
+
+  <section class="panel active" id="dashboard">
+    <h2>ダッシュボード</h2>
+    <div class="cards">
+      <div class="card"><div class="k">総資産</div><div class="v" id="dashTotal">-</div></div>
+      <div class="card"><div class="k">BTC待機資金</div><div class="v" id="dashBtcCash">-</div></div>
+      <div class="card"><div class="k">EDV評価額</div><div class="v" id="dashEdv">-</div></div>
+      <div class="card"><div class="k">BTC購入判定</div><div class="v" id="dashBtcStatus">-</div></div>
+    </div>
+    <div class="split">
+      <div>
+        <h3>現在の主判定</h3>
+        <div class="resultBox" id="dashboardSummary">未判定</div>
+      </div>
+      <div>
+        <h3>優先確認事項</h3>
+        <ul class="checklist" id="priorityList"></ul>
+      </div>
+    </div>
+    <div class="split">
+      <div>
+        <h3>資産配分</h3>
+        <div id="allocationChart" class="resultBox">未計算</div>
+      </div>
+      <div>
+        <h3>データ整合性チェック</h3>
+        <div id="integrityBox" class="resultBox">未確認</div>
+      </div>
+    </div>
+    <div class="btns">
+      <button onclick="runAll()">全判定を更新</button>
+      <button class="ok" onclick="fetchAllMarketData()">APIで市場データ更新</button>
+      <button class="secondary" onclick="saveAll()">保存</button>
+      <button class="secondary" onclick="downloadSnapshot()">現状スナップショットCSV</button>
+    </div>
+  </section>
+
+
+  <section class="panel" id="quick">
+    <h2>一画面運用</h2>
+    <div class="notice" id="v11AutoNote">
+      普段はこの画面だけで使う。判定は自動で行い、表示は「買い推奨」ではなく「推奨候補＝条件一致度が高い調査候補」とする。
+    </div>
+    <div class="notice">
+      普段はこの画面だけで使う。API取得、BTC判定、EDV判定、個別株の簡易判定、売買前点検、ログ保存をここに集約する。
+    </div>
+
+    <h3>1. 市場データ更新</h3>
+    <div class="grid">
+      <div class="col-3"><label>Alpha Vantage API Key</label><input id="quickAlphaKey" type="password" placeholder="未入力ならAPI連携タブの値を使用"></div>
+      <div class="col-2"><label>EDV株数</label><input id="quickEdvShares" type="number" value="382"></div>
+      <div class="col-2"><label>取得間隔（秒）</label><input id="quickAlphaDelay" type="number" value="10"></div>
+      <div class="col-3"><label>API状態</label><input id="quickApiStatus" readonly value="未取得"></div>
+      <div class="col-2"><label>最終更新</label><input id="quickLastUpdate" readonly></div>
+    </div>
+    <div class="btns">
+      <button onclick="quickFetchAll()">一括取得・全判定</button>
+      <button class="secondary" onclick="fetchBTCFromCoinGecko()">BTCのみ取得</button>
+      <button class="secondary" onclick="quickSyncToMain()">一画面入力を反映</button>
+    </div>
+
+    <h3>2. 現在の結論</h3>
+    <div class="cards">
+      <div class="card"><div class="k">BTC価格</div><div class="v" id="quickBtcPrice">-</div></div>
+      <div class="card"><div class="k">BTC判定</div><div class="v" id="quickBtcDecision">-</div></div>
+      <div class="card"><div class="k">EDV評価額</div><div class="v" id="quickEdvValue">-</div></div>
+      <div class="card"><div class="k">EDV判定</div><div class="v" id="quickEdvDecision">-</div></div>
+    </div>
+    <div class="split">
+      <div>
+        <h3>BTC判定</h3>
+        <div class="resultBox" id="quickBtcResult">未判定</div>
+      </div>
+      <div>
+        <h3>EDV判定</h3>
+        <div class="resultBox" id="quickEdvResult">未判定</div>
+      </div>
+    </div>
+
+    <h3>3. 推奨候補銘柄チェック</h3>
+    <div class="grid">
+      <div class="col-3"><label>銘柄名またはティッカー</label><input id="quickStockInput" placeholder="例：NVIDIA / NVDA / Microsoft / MSFT"></div>
+      <div class="col-2"><label>変換後ティッカー</label><input id="quickResolvedTicker" readonly></div>
+      <div class="col-2"><label>API株価</label><input id="quickStockPrice" readonly></div>
+      <div class="col-2"><label>変化率</label><input id="quickStockChange" readonly></div>
+      <div class="col-3"><label>更新日</label><input id="quickStockDate" readonly></div>
+
+      <div class="col-2"><label>EPS成長率%</label><input type="number" id="quickEpsGrowth" value="20"></div>
+      <div class="col-2"><label>売上成長率%</label><input type="number" id="quickSalesGrowth" value="15"></div>
+      <div class="col-2"><label>ROE%</label><input type="number" id="quickRoe" value="15"></div>
+      <div class="col-2"><label>財務</label>
+        <select id="quickBalanceQuality"><option value="bad">弱い</option><option value="normal" selected>普通</option><option value="good">強い</option></select>
+      </div>
+      <div class="col-2"><label>競争優位性</label>
+        <select id="quickMoat"><option value="none">不明・弱い</option><option value="some" selected>一定あり</option><option value="strong">強い</option></select>
+      </div>
+      <div class="col-2"><label>チャート</label>
+        <select id="quickChartShape"><option value="bad">崩れ</option><option value="base" selected>ベース形成</option><option value="breakout">高出来高ブレイクアウト</option></select>
+      </div>
+      <div class="col-3"><label>市場地合い</label>
+        <select id="quickMarketTrend"><option value="bad">悪い</option><option value="neutral" selected>中立</option><option value="good">良い</option></select>
+      </div>
+      <div class="col-9"><label>メモ</label><input id="quickStockMemo" placeholder="決算、材料、リスク、チャート所感"></div>
+    </div>
+    <div class="btns">
+      <button onclick="quickFetchStock()">株価取得</button>
+      <button onclick="quickAnalyzeStock()">自動判定</button>
+      <button class="ok" onclick="quickAddStockLog()">推奨候補ログ追加</button>
+    </div>
+    <div class="resultBox" id="quickStockResult">未判定</div>
+
+
+
+    <h3>4. 推奨候補スクリーニング</h3>
+    <div class="notice">
+      ここでいう「推奨候補」は、条件一致度が高い調査候補という意味。自動で買い判断はしない。
+      最終判断は、決算・出来高・地合い・損切り位置を確認してから行う。
+    </div>
+    <div class="grid">
+      <div class="col-8">
+        <label>推奨候補リスト / 推奨候補チェック対象</label>
+        <textarea id="quickRecommendList">NVDA
+MSFT
+AAPL
+AMZN
+GOOGL
+META
+AVGO
+PLTR
+AMD
+ARM</textarea>
+      </div>
+      <div class="col-2">
+        <label>推奨候補しきい値</label>
+        <input id="recommendThreshold" type="number" value="7" step="1">
+      </div>
+      <div class="col-2">
+        <label>株価連続取得</label>
+        <select id="recommendUseApi">
+          <option value="no" selected>しない</option>
+          <option value="yes">する</option>
+        </select>
+      </div>
+      <div class="col-2">
+        <label>最大判定数</label>
+        <input id="recommendMaxCount" type="number" value="20" step="1">
+      </div>
+      <div class="col-2">
+        <label>自動判定状態</label>
+        <input id="recommendStatus" readonly value="未判定">
+      </div>
+    </div>
+    <div class="btns">
+      <button onclick="autoScreenRecommendations()">推奨候補を自動判定</button>
+      <button class="secondary" onclick="addRecommendationLog()">推奨候補結果をログ追加</button>
+    </div>
+    <div class="resultBox" id="recommendResult">未判定</div>
+
+    <h3>4-2. 推奨候補の自動入替</h3>
+    <div class="notice">
+      候補プールから、分析済みスコアの高い銘柄を推奨候補リストへ自動反映する。
+      未分析の銘柄は買い候補にしない。まず上位候補だけチャート分析する。
+    </div>
+    <div class="grid">
+      <div class="col-8">
+        <label>候補プール</label>
+        <textarea id="candidatePoolList">NVDA
+MSFT
+AAPL
+AMZN
+GOOGL
+META
+AVGO
+PLTR
+AMD
+ARM
+COST
+NFLX
+TSLA</textarea>
+      </div>
+      <div class="col-2">
+        <label>採用枠</label>
+        <input id="candidateSlotCount" type="number" value="10" step="1">
+      </div>
+      <div class="col-2">
+        <label>最低スコア</label>
+        <input id="candidateMinScore" type="number" value="6" step="1">
+      </div>
+    </div>
+    <div class="btns">
+      <button onclick="autoReplaceRecommendationList()">推奨候補を自動入替</button>
+      <button class="secondary" onclick="resetCandidateScores()">分析スコアをリセット</button>
+      <button class="secondary" onclick="addCandidateReplacementLog()">入替結果をログ追加</button>
+    </div>
+    <div class="resultBox" id="candidateReplaceResult">未実行</div>
+
+
+    <h3>5. チャート・テクニカル分析</h3>
+    <div class="notice" id="v23ChartNote">v23では月ラベルを毎月固定表示に修正。始点・終点の日付表示を削除し、日足・週足・月足で月ラベルを整理した。</div>
+    <div class="grid">
+      <div class="col-3"><label>チャート対象</label>
+        <select id="quickChartTarget">
+          <option value="BTC" selected>BTC</option>
+          <option value="EDV">EDV</option>
+          <option value="STOCK">個別株</option>
+          <option value="CUSTOM">カスタム</option>
+        </select>
+      </div>
+      <div class="col-3"><label>ティッカー/ID</label><input id="quickChartSymbol" placeholder="BTCならbitcoin、株ならNVDAなど"></div>
+      <div class="col-3"><label>足種</label>
+        <select id="quickChartInterval">
+          <option value="daily" selected>日足</option>
+          <option value="weekly">週足</option>
+          <option value="monthly">月足</option>
+        </select>
+      </div>
+      <div class="col-3"><label>期間</label><input id="quickChartDays" readonly value="365"></div>
+      <div class="col-3"><label>表示形式</label>
+        <select id="quickChartType">
+          <option value="candlestick" selected>ローソク足</option>
+          <option value="line">ライン</option>
+        </select>
+      </div>
+      <div class="col-3"><label>自動更新</label><input id="quickChartAutoRefresh" readonly value="する"></div>
+      <div class="col-3"><label>期間設定</label><input id="quickChartCorrection" readonly value="365日固定"></div>
+      <div class="col-3"><label>月表示</label><select id="quickMonthLabels"><option value="yes" selected>する</option><option value="no">しない</option></select></div>
+      <div class="col-3"><label>チャート状態</label><input id="quickChartStatus" readonly value="未取得"></div>
+    </div>
+    <div class="btns">
+      <button onclick="quickFetchChartAndAnalyze()">チャート取得・分析</button>
+      <button class="secondary" onclick="quickAddChartLog()">チャート分析をログ追加</button>
+    </div>
+    <div class="chartWrap">
+      <canvas id="quickChartCanvas" class="chartCanvas"></canvas>
+    </div>
+    <div class="techGrid">
+      <div class="techTile"><div class="k">終値</div><div class="v" id="techLastPrice">-</div></div>
+      <div class="techTile"><div class="k">MA50</div><div class="v" id="techMa50">-</div></div>
+      <div class="techTile"><div class="k">MA200</div><div class="v" id="techMa200">-</div></div>
+      <div class="techTile"><div class="k">RSI14</div><div class="v" id="techRsi">-</div></div>
+    </div>
+    <div class="resultBox" id="quickTechResult">未分析</div>
+
+    <h3>6. 今日の判断ログ</h3>
+    <div class="grid">
+      <div class="col-3"><label>対象</label>
+        <select id="quickLogTarget"><option>BTC</option><option>EDV</option><option>個別株</option><option>S&P500</option><option>その他</option></select>
+      </div>
+      <div class="col-3"><label>判断</label>
+        <select id="quickLogDecision"><option>見送り</option><option>買い検討</option><option>分割購入</option><option>売却検討</option><option>保有継続</option><option>要確認</option></select>
+      </div>
+      <div class="col-3"><label>金額</label><input id="quickLogAmount" type="number" value="0"></div>
+      <div class="col-3"><label>日付</label><input id="quickLogDate" type="date"></div>
+      <div class="col-12"><label>理由・条件・撤退条件</label><textarea id="quickLogReason"></textarea></div>
+    </div>
+    <div class="btns">
+      <button onclick="quickFillTodayHoldLog()">今日の見送りログを自動作成</button>
+      <button class="ok" onclick="quickAddManualLog()">ログ追加</button>
+      <button class="secondary" onclick="exportLogs()">ログCSV出力</button>
+    </div>
+  </section>
+
+  <section class="panel" id="assets">
+    <h2>資産・市場入力</h2>
+    <h3>資産入力</h3>
+    <table id="assetTable">
+      <thead>
+        <tr>
+          <th>分類</th><th>名称</th><th>評価額（円）</th><th>用途・メモ</th><th>削除</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+    <div class="btns">
+      <button class="secondary" onclick="addAsset()">資産行追加</button>
+      <button onclick="saveAll()">保存</button>
+    </div>
+
+    <h3>市場・マクロ入力</h3>
+    <div class="grid">
+      <div class="col-3"><label>BTC価格（USD）</label><input type="number" id="btcPrice" value="65000" step="100"></div>
+      <div class="col-3"><label>BTC直近最高値（USD）</label><input type="number" id="btcAth" value="126000" step="100"></div>
+      <div class="col-3"><label>USD/JPY</label><input type="number" id="usdJpy" value="155" step="0.01"></div>
+      <div class="col-3"><label>BTC 200日移動平均（USD）</label><input type="number" id="btcMa200" value="75000" step="100"></div>
+
+      <div class="col-3"><label>BTC 50日移動平均（USD）</label><input type="number" id="btcMa50" value="68000" step="100"></div>
+      <div class="col-3"><label>月足RSI</label><input type="number" id="btcMonthlyRsi" value="55" step="1"></div>
+      <div class="col-3"><label>週足RSI</label><input type="number" id="btcWeeklyRsi" value="45" step="1"></div>
+      <div class="col-3"><label>出来高・ボラティリティ</label>
+        <select id="btcVolumeState">
+          <option value="cooling">低下・沈静化</option>
+          <option value="normal">通常</option>
+          <option value="euphoric">過熱・急増</option>
+        </select>
+      </div>
+
+      <div class="col-3"><label>マクロ環境</label>
+        <select id="macroState">
+          <option value="bad">悪い：金利高・流動性悪化</option>
+          <option value="neutral" selected>中立</option>
+          <option value="good">良い：金利低下・流動性改善</option>
+        </select>
+      </div>
+      <div class="col-3"><label>米10年金利（%）</label><input type="number" id="us10y" value="4.5" step="0.01"></div>
+      <div class="col-3"><label>EDV価格・評価参考</label><input type="number" id="edvPrice" value="75" step="0.01"></div>
+      <div class="col-3"><label>相場メモ</label><input id="marketMemo" placeholder="FOMC、CPI、地合いなど"></div>
+    </div>
+    <div class="btns">
+      <button onclick="runAll()">判定更新</button>
+      <button class="secondary" onclick="saveAll()">保存</button>
+    </div>
+  </section>
+
+
+  <section class="panel" id="api">
+    <h2>API連携</h2>
+    <div class="notice">
+      BTCはCoinGecko、EDV・USD/JPY・米10年金利・米国株はAlpha Vantageを使う。Alpha Vantage無料枠対策として、取得間隔を空けて順番に取得する。
+      Alpha Vantageは無料APIキーが必要。APIキーはこの端末のブラウザ内に保存されるため、自分専用で使う。
+      iPhoneで使う場合は、HTTPSで公開したURLをSafariで開き、「共有」→「ホーム画面に追加」を使う。
+    </div>
+
+    <h3>APIキー</h3>
+    <div class="grid">
+      <div class="col-6">
+        <label>CoinGecko Demo API Key（空欄でも取得を試行）</label>
+        <input id="coingeckoKey" type="password" placeholder="任意。空欄可">
+      </div>
+      <div class="col-6">
+        <label>Alpha Vantage API Key（EDV・為替・金利・株価に必要）</label>
+        <input id="alphaKey" type="password" placeholder="Alpha Vantageの無料APIキー">
+      </div>
+      <div class="col-3">
+        <label>EDV保有株数</label>
+        <input id="edvShares" type="number" value="382" step="1">
+      </div>
+      <div class="col-3">
+        <label>EDV評価額を自動反映</label>
+        <select id="apiAutoFillEdv">
+          <option value="yes">する</option>
+          <option value="no" selected>しない</option>
+        </select>
+      </div>
+      <div class="col-3">
+        <label>API最終更新</label>
+        <input id="apiLastUpdate" readonly>
+      </div>
+      <div class="col-3">
+        <label>API状態</label>
+        <input id="apiStatus" readonly value="未取得">
+      </div>
+      <div class="col-3">
+        <label>Alpha取得間隔（秒）</label>
+        <input id="alphaDelaySec" type="number" value="3" step="1">
+      </div>
+      <div class="col-3">
+        <label>API取得後に全判定更新</label>
+        <select id="apiAutoRunAll">
+          <option value="yes">する</option>
+          <option value="no" selected>しない</option>
+        </select>
+      </div>
+      <div class="col-3">
+        <label>証券口座EDV評価額（円）</label>
+        <input id="brokerEdvValue" type="number" value="0" step="1000" placeholder="任意">
+      </div>
+      <div class="col-3">
+        <label>許容差額（円）</label>
+        <input id="edvToleranceYen" type="number" value="100000" step="10000">
+      </div>
+      <div class="col-3">
+        <label>Alpha使用回数目安</label>
+        <input id="alphaDailyCount" readonly value="0 / 25">
+      </div>
+      <div class="col-3">
+        <label>Alpha残り回数目安</label>
+        <input id="alphaRemainingCount" readonly value="25">
+      </div>
+    </div>
+
+    <div class="btns">
+      <button onclick="fetchAllMarketData()">まとめて取得</button>
+      <button class="secondary" onclick="fetchBTCFromCoinGecko()">BTCのみ取得</button>
+      <button class="secondary" onclick="fetchAlphaCore()">EDV・為替・金利取得</button>
+      <button class="secondary" onclick="fetchStockFromAlpha()">株価取得</button>
+      <button class="secondary" onclick="saveAll()">API設定保存</button>
+      <button class="secondary" onclick="resetAlphaCounter()">Alpha回数リセット</button>
+      <button class="secondary" onclick="runIntegrityCheck()">整合性チェック</button>
+    </div>
+
+    <h3>取得結果</h3>
+    <table>
+      <tbody>
+        <tr><th>BTC/USD</th><td id="apiBtcUsd">-</td><th>BTC/JPY</th><td id="apiBtcJpy">-</td></tr>
+        <tr><th>BTC 24h変化率</th><td id="apiBtcChange">-</td><th>BTC ATH</th><td id="apiBtcAth">-</td></tr>
+        <tr><th>USD/JPY</th><td id="apiUsdJpy">-</td><th>米10年金利</th><td id="apiUs10y">-</td></tr>
+        <tr><th>EDV価格</th><td id="apiEdvPrice">-</td><th>EDV評価額概算</th><td id="apiEdvValue">-</td></tr>
+        <tr><th>個別株API価格</th><td id="apiStockPrice">-</td><th>個別株更新日</th><td id="apiStockDate">-</td></tr>
+      </tbody>
+    </table>
+
+    <h3>iPhoneで使う条件</h3>
+    <div class="resultBox">1. index.html / manifest.webmanifest / sw.js を同じフォルダに置く
+2. GitHub PagesなどHTTPSで公開する
+3. iPhoneのSafariでURLを開く
+4. 共有ボタン → ホーム画面に追加
+5. API取得にはインターネット接続が必要。オフライン時は最後に保存した手入力値で判定する。</div>
+  </section>
+
+  <section class="panel" id="btc">
+    <h2>BTC購入判定</h2>
+    <div class="grid">
+      <div class="col-3"><label>購入検討原資：日本円現金（円）</label><input type="number" id="btcCashAvailable" value="3012414" step="1000"></div>
+      <div class="col-3"><label>基本分割購入額（円/月）</label><input type="number" id="btcMonthlyBuy" value="400000" step="10000"></div>
+      <div class="col-3"><label>BTC投入上限（円）</label><input type="number" id="btcMaxBudget" value="4000000" step="10000"></div>
+      <div class="col-3"><label>EDV売却候補額（円）</label><input type="number" id="edvSellCandidate" value="1000000" step="10000"></div>
+    </div>
+    <div class="btns">
+      <button onclick="analyzeBTC()">BTC判定</button>
+      <button class="ok" onclick="addLogFromResult('BTC')">BTC判断をログ追加</button>
+    </div>
+    <div class="resultBox" id="btcResult">未判定</div>
+    <h3>BTC判定条件チェック</h3>
+    <table>
+      <tbody id="btcCheckRows"></tbody>
+    </table>
+  </section>
+
+  <section class="panel" id="edv">
+    <h2>EDV売却判定</h2>
+    <div class="grid">
+      <div class="col-3"><label>EDV評価額（円）</label><input type="number" id="edvValueInput" value="3728164" step="1000"></div>
+      <div class="col-3"><label>EDV売却条件</label>
+        <select id="edvSellPolicy">
+          <option value="strict" selected>厳格：BTC 50,000ドル以下＋資金不足時のみ</option>
+          <option value="moderate">中間：BTC 60,000ドル以下＋資産配分調整時</option>
+          <option value="flexible">柔軟：機会重視</option>
+        </select>
+      </div>
+      <div class="col-3"><label>金利方向</label>
+        <select id="rateDirection">
+          <option value="up">上昇</option>
+          <option value="flat" selected>横ばい</option>
+          <option value="down">低下</option>
+        </select>
+      </div>
+      <div class="col-3"><label>EDV売却メモ</label><input id="edvMemo" placeholder="売却理由・保有理由"></div>
+    </div>
+    <div class="btns">
+      <button onclick="analyzeEDV()">EDV判定</button>
+      <button class="ok" onclick="addLogFromResult('EDV')">EDV判断をログ追加</button>
+    </div>
+    <div class="resultBox" id="edvResult">未判定</div>
+  </section>
+
+  <section class="panel" id="stock">
+    <h2>個別株 CAN SLIM × バフェット判定</h2>
+    <div class="grid">
+      <div class="col-3"><label>銘柄名</label><input id="stockName" placeholder="例：銘柄名"></div>
+      <div class="col-3"><label>米国株ティッカー</label><input id="stockTicker" placeholder="例：AAPL / NVDA"></div>
+      <div class="col-3"><label>API取得株価（USD）</label><input id="stockApiPrice" readonly></div>
+      <div class="col-3"><label>API取得変化率</label><input id="stockApiChange" readonly></div>
+      <div class="col-3"><label>EPS成長率（%）</label><input type="number" id="epsGrowth" value="20" step="1"></div>
+      <div class="col-3"><label>売上成長率（%）</label><input type="number" id="salesGrowth" value="15" step="1"></div>
+      <div class="col-3"><label>ROE（%）</label><input type="number" id="roe" value="15" step="1"></div>
+
+      <div class="col-3"><label>財務健全性</label>
+        <select id="balanceQuality">
+          <option value="bad">弱い</option>
+          <option value="normal" selected>普通</option>
+          <option value="good">強い</option>
+        </select>
+      </div>
+      <div class="col-3"><label>競争優位性</label>
+        <select id="moat">
+          <option value="none">不明・弱い</option>
+          <option value="some" selected>一定あり</option>
+          <option value="strong">強い</option>
+        </select>
+      </div>
+      <div class="col-3"><label>チャート形状</label>
+        <select id="chartShape">
+          <option value="bad">崩れ</option>
+          <option value="base" selected>ベース形成</option>
+          <option value="breakout">高出来高ブレイクアウト</option>
+        </select>
+      </div>
+      <div class="col-3"><label>市場地合い</label>
+        <select id="marketTrend">
+          <option value="bad">悪い</option>
+          <option value="neutral" selected>中立</option>
+          <option value="good">良い</option>
+        </select>
+      </div>
+
+      <div class="col-12"><label>個別株メモ</label><textarea id="stockMemo" placeholder="決算、材料、チャート、リスクなど"></textarea></div>
+    </div>
+    <div class="btns">
+      <button onclick="analyzeStock()">自動判定</button>
+      <button class="ok" onclick="addLogFromResult('個別株')">個別株判断をログ追加</button>
+    </div>
+    <div class="resultBox" id="stockResult">未判定</div>
+  </section>
+
+  <section class="panel" id="log">
+    <h2>判断ログ</h2>
+    <div class="grid">
+      <div class="col-3"><label>対象</label>
+        <select id="logTarget">
+          <option>BTC</option><option>EDV</option><option>S&P500</option><option>個別株</option><option>その他</option>
+        </select>
+      </div>
+      <div class="col-3"><label>判断</label>
+        <select id="logDecision">
+          <option>見送り</option><option>買い検討</option><option>分割購入</option><option>売却検討</option><option>保有継続</option><option>要確認</option>
+        </select>
+      </div>
+      <div class="col-3"><label>資金量（円）</label><input type="number" id="logAmount" value="0" step="10000"></div>
+      <div class="col-3"><label>日付</label><input type="date" id="logDate"></div>
+      <div class="col-12"><label>理由・条件・撤退条件</label><textarea id="logReason"></textarea></div>
+    </div>
+    <div class="btns">
+      <button onclick="addManualLog()">ログ追加</button>
+      <button class="secondary" onclick="exportLogs()">ログCSV出力</button>
+      <button class="secondary" onclick="exportAllJson()">全データJSON出力</button>
+      <button class="danger" onclick="clearLogs()">ログ全削除</button>
+    </div>
+    <table id="logTable">
+      <thead>
+        <tr><th>日時</th><th>対象</th><th>判断</th><th>資金量</th><th>理由・条件・撤退条件</th><th>削除</th></tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </section>
+
+  <section class="panel" id="settings">
+    <h2>条件設定</h2>
+    <div class="grid">
+      <div class="col-3"><label>BTC原則見送りライン（USD）</label><input type="number" id="setBtcWaitAbove" value="60000" step="100"></div>
+      <div class="col-3"><label>BTC本命候補上限（USD）</label><input type="number" id="setBtcMainUpper" value="50000" step="100"></div>
+      <div class="col-3"><label>BTC強気買い候補上限（USD）</label><input type="number" id="setBtcStrongUpper" value="40000" step="100"></div>
+      <div class="col-3"><label>必要生活防衛資金（円）</label><input type="number" id="setEmergencyCash" value="1000000" step="10000"></div>
+
+      <div class="col-3"><label>税金支払い用現金（円）</label><input type="number" id="setTaxCash" value="0" step="10000"></div>
+      <div class="col-3"><label>S&P500積立（月額円）</label><input type="number" id="setSp500Monthly" value="100000" step="10000"></div>
+      <div class="col-3"><label>BTC最大比率（総資産比%）</label><input type="number" id="setBtcMaxRatio" value="30" step="1"></div>
+      <div class="col-3"><label>判定の厳しさ</label>
+        <select id="setStrictness">
+          <option value="strict" selected>厳格</option>
+          <option value="normal">標準</option>
+          <option value="loose">緩め</option>
+        </select>
+      </div>
+      <div class="col-12"><label>個人ルール</label><textarea id="personalRules">BTCは60,000ドル以下を中心に検討。60,000ドル超では原則として急がない。EDVは安易に売らない。S&P500積立は長期継続を基本とする。個別株は優位性が低ければ見送り。</textarea></div>
+    </div>
+    <div class="btns">
+      <button onclick="saveAll()">条件保存</button>
+      <button class="secondary" onclick="loadDefaults()">初期値に戻す</button>
+      <button class="danger" onclick="clearAllData()">全データ削除</button>
+    </div>
+    <div class="footerNote">
+      API連携を追加済み。ただしAPI取得に失敗した場合は手入力値を優先する。iPhoneではHTTPS上に置いてSafariで開くとホーム画面追加が使いやすい。
+    </div>
+  </section>
+</main>
+
+<script>
+const STORAGE_KEY = "investmentDecisionAppV5";
+let logs = [];
+let lastResults = { BTC:"", EDV:"", "個別株":"" };
+
+const defaultAssets = [
+  {type:"投資信託", name:"S&P500系投資信託（NISA積立）", value:4509945, memo:"毎月100,000円積立。長期運用の中心。"},
+  {type:"ETF", name:"EDV", value:3728164, memo:"金利低下・株式下落ヘッジ。BTC資金の例外候補。"},
+  {type:"現金", name:"GMOコイン日本円", value:1001508, memo:"BTC待機資金"},
+  {type:"現金", name:"bitFlyer総資産", value:2010906, memo:"BTC待機資金"},
+  {type:"現金", name:"銀行・生活防衛資金", value:0, memo:"生活・税金・家族資金。投資不可分は分ける。"}
+];
+
+function yen(n){
+  const x = Number(n || 0);
+  return x.toLocaleString("ja-JP") + "円";
+}
+function usd(n){
+  const x = Number(n || 0);
+  return "$" + x.toLocaleString("en-US", {maximumFractionDigits:0});
+}
+function pct(n){
+  if(!isFinite(n)) return "-";
+  return (n*100).toFixed(1) + "%";
+}
+function num(id){ return Number(document.getElementById(id).value || 0); }
+function val(id){ return document.getElementById(id).value; }
+function setVal(id, v){ document.getElementById(id).value = v; }
+
+function todayString(){
+  const d = new Date();
+  const y = d.getFullYear();
+  const m = String(d.getMonth()+1).padStart(2,"0");
+  const day = String(d.getDate()).padStart(2,"0");
+  return `${y}-${m}-${day}`;
+}
+function nowString(){
+  const d = new Date();
+  const pad = n => String(n).padStart(2,"0");
+  return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+
+document.querySelectorAll(".tab").forEach(btn=>{
+  btn.addEventListener("click", ()=>{
+    document.querySelectorAll(".tab").forEach(b=>b.classList.remove("active"));
+    document.querySelectorAll("section.panel").forEach(p=>p.classList.remove("active"));
+    btn.classList.add("active");
+    document.getElementById(btn.dataset.tab).classList.add("active");
+  });
+});
+
+function renderAssets(assets){
+  const tbody = document.querySelector("#assetTable tbody");
+  tbody.innerHTML = "";
+  assets.forEach((a,i)=>{
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td><input value="${escapeHtml(a.type||"")}" data-asset="${i}" data-field="type"></td>
+      <td><input value="${escapeHtml(a.name||"")}" data-asset="${i}" data-field="name"></td>
+      <td><input type="number" value="${Number(a.value||0)}" data-asset="${i}" data-field="value"></td>
+      <td><textarea data-asset="${i}" data-field="memo">${escapeHtml(a.memo||"")}</textarea></td>
+      <td><button class="danger" onclick="removeAsset(${i})">削除</button></td>
+    `;
+    tbody.appendChild(tr);
+  });
+  tbody.querySelectorAll("input,textarea").forEach(el=>{
+    el.addEventListener("input", ()=>{
+      const data = getData();
+      const idx = Number(el.dataset.asset);
+      const field = el.dataset.field;
+      if(field === "value") data.assets[idx][field] = Number(el.value || 0);
+      else data.assets[idx][field] = el.value;
+      saveDataObj(data, false);
+      updateDashboard();
+    });
+  });
+}
+function escapeHtml(s){
+  return String(s).replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;");
+}
+function addAsset(){
+  const data = getData();
+  data.assets.push({type:"", name:"", value:0, memo:""});
+  saveDataObj(data);
+  renderAssets(data.assets);
+}
+function removeAsset(i){
+  const data = getData();
+  data.assets.splice(i,1);
+  saveDataObj(data);
+  renderAssets(data.assets);
+  updateDashboard();
+}
+
+function getAssetsFromTable(){
+  const rows = [...document.querySelectorAll("#assetTable tbody tr")];
+  return rows.map(row=>{
+    const inputs = row.querySelectorAll("input,textarea");
+    return {
+      type: inputs[0].value,
+      name: inputs[1].value,
+      value: Number(inputs[2].value || 0),
+      memo: inputs[3].value
+    };
+  });
+}
+
+function collectForm(){
+  const ids = [
+    "btcPrice","btcAth","usdJpy","btcMa200","btcMa50","btcMonthlyRsi","btcWeeklyRsi","btcVolumeState",
+    "macroState","us10y","edvPrice","marketMemo","btcCashAvailable","btcMonthlyBuy","btcMaxBudget",
+    "edvSellCandidate","edvValueInput","edvSellPolicy","rateDirection","edvMemo","stockName","epsGrowth",
+    "salesGrowth","roe","balanceQuality","moat","chartShape","marketTrend","stockMemo","setBtcWaitAbove",
+    "setBtcMainUpper","setBtcStrongUpper","setEmergencyCash","setTaxCash","setSp500Monthly","setBtcMaxRatio",
+    "setStrictness","personalRules","coingeckoKey","alphaKey","edvShares","apiAutoFillEdv","apiLastUpdate","apiStatus","stockTicker","stockApiPrice","stockApiChange","alphaDelaySec"
+  ];
+  const form = {};
+  ids.forEach(id=>{
+    const el = document.getElementById(id);
+    form[id] = el ? el.value : "";
+  });
+  return form;
+}
+function applyForm(form){
+  Object.keys(form||{}).forEach(id=>{
+    const el = document.getElementById(id);
+    if(el) el.value = form[id];
+  });
+}
+function getData(){
+  const raw = localStorage.getItem(STORAGE_KEY);
+  let data = raw ? JSON.parse(raw) : null;
+  if(!data){
+    data = {assets: defaultAssets, form: collectForm(), logs: []};
+  }
+  data.assets = data.assets || defaultAssets;
+  data.form = Object.assign(collectForm(), data.form || {});
+  data.logs = data.logs || [];
+  return data;
+}
+function saveDataObj(data, notify=true){
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  if(notify) console.log("saved");
+}
+function saveAll(){
+  const data = getData();
+  data.assets = getAssetsFromTable();
+  data.form = collectForm();
+  data.logs = logs;
+  saveDataObj(data);
+  updateDashboard();
+}
+function loadAll(){
+  const data = getData();
+  applyForm(data.form);
+  logs = data.logs || [];
+  renderAssets(data.assets);
+  renderLogs();
+  const logDate = document.getElementById("logDate");
+  if(!logDate.value) logDate.value = todayString();
+  if(val("apiAutoRunAll") === "yes") runAll();
+}
+function clearAllData(){
+  if(!confirm("全データを削除する？")) return;
+  localStorage.removeItem(STORAGE_KEY);
+  logs = [];
+  location.reload();
+}
+function loadDefaults(){
+  if(!confirm("初期値に戻す？ 判断ログも削除される。")) return;
+  localStorage.removeItem(STORAGE_KEY);
+  logs = [];
+  location.reload();
+}
+
+function assetSum(filterFn){
+  return getAssetsFromTable().filter(filterFn).reduce((s,a)=>s+Number(a.value||0),0);
+}
+function totalAssets(){
+  return getAssetsFromTable().reduce((s,a)=>s+Number(a.value||0),0);
+}
+function btcCash(){
+  return getAssetsFromTable()
+    .filter(a => (a.type||"").includes("現金") && ((a.memo||"").includes("BTC") || (a.name||"").includes("GMO") || (a.name||"").includes("bitFlyer")))
+    .reduce((s,a)=>s+Number(a.value||0),0);
+}
+function edvValue(){
+  const fromAssets = getAssetsFromTable().filter(a => (a.name||"").toUpperCase().includes("EDV")).reduce((s,a)=>s+Number(a.value||0),0);
+  return fromAssets || num("edvValueInput");
+}
+
+function analyzeBTC(){
+  saveAll();
+  const price = num("btcPrice");
+  const ath = num("btcAth");
+  const waitAbove = num("setBtcWaitAbove");
+  const mainUpper = num("setBtcMainUpper");
+  const strongUpper = num("setBtcStrongUpper");
+  const mRsi = num("btcMonthlyRsi");
+  const wRsi = num("btcWeeklyRsi");
+  const ma200 = num("btcMa200");
+  const ma50 = num("btcMa50");
+  const macro = val("macroState");
+  const volume = val("btcVolumeState");
+  const cash = num("btcCashAvailable");
+  const monthly = num("btcMonthlyBuy");
+  const maxBudget = num("btcMaxBudget");
+  const emergency = num("setEmergencyCash");
+  const taxCash = num("setTaxCash");
+  const total = totalAssets();
+  const maxRatio = num("setBtcMaxRatio") / 100;
+  const drawdown = ath > 0 ? (ath - price) / ath : 0;
+
+  let score = 0;
+  let checks = [];
+
+  function addCheck(name, ok, weight, note){
+    if(ok) score += weight;
+    checks.push({name, ok, weight, note});
+  }
+
+  addCheck(`BTC価格が原則ライン ${usd(waitAbove)} 以下`, price <= waitAbove, 3, price <= waitAbove ? "価格条件は満たす" : "60,000ドル超は原則見送り");
+  addCheck(`BTC価格が本命候補 ${usd(mainUpper)} 以下`, price <= mainUpper, 2, price <= mainUpper ? "本命買い場候補に近い" : "本命条件は未達");
+  addCheck(`BTC価格が強気候補 ${usd(strongUpper)} 以下`, price <= strongUpper, 1, price <= strongUpper ? "深い下落局面" : "深い下落条件は未達");
+  addCheck("最高値から50%以上下落", drawdown >= .50, 2, `現在の下落率 ${pct(drawdown)}`);
+  addCheck("月足RSIが55以下", mRsi <= 55, 1, `月足RSI ${mRsi}`);
+  addCheck("週足RSIが50以下", wRsi <= 50, 1, `週足RSI ${wRsi}`);
+  addCheck("価格が200日線以下", price <= ma200, 1, `200日線 ${usd(ma200)}`);
+  addCheck("50日線が200日線以下または接近", ma50 <= ma200, 1, `50日線 ${usd(ma50)} / 200日線 ${usd(ma200)}`);
+  addCheck("出来高・ボラティリティが沈静化", volume === "cooling", 1, volumeLabel(volume));
+  addCheck("マクロ環境が中立以上", macro !== "bad", 1, macroLabel(macro));
+  addCheck("生活防衛・税金資金を除いた余力がある", cash > emergency + taxCash, 2, `待機資金 ${yen(cash)} / 防衛+税金 ${yen(emergency+taxCash)}`);
+  addCheck("BTC投入上限が総資産比の上限内", maxBudget <= total * maxRatio || total === 0, 1, `投入上限 ${yen(maxBudget)} / 総資産上限 ${yen(total*maxRatio)}`);
+
+  let decision = "見送り";
+  let status = "danger";
+  let suggested = 0;
+  let reason = "";
+
+  if(price > waitAbove){
+    decision = "原則見送り";
+    status = "danger";
+    suggested = 0;
+    reason = "きみの基本条件である60,000ドル以下を満たしていない。FOMO対策として新規購入を急がない。";
+  } else if(score >= 13 && price <= mainUpper){
+    decision = "分割購入検討";
+    status = "ok";
+    suggested = Math.min(monthly, Math.max(0, cash - emergency - taxCash), maxBudget);
+    reason = "価格条件、過熱感解消、資金余力の条件がかなり揃っている。月額上限内で分割購入候補。";
+  } else if(score >= 10){
+    decision = "少額分割検討";
+    status = "warn";
+    suggested = Math.min(Math.round(monthly/2), Math.max(0, cash - emergency - taxCash));
+    reason = "一部条件は満たすが、本命条件までは不足。少額か見送りの比較。";
+  } else {
+    decision = "見送り優勢";
+    status = "danger";
+    suggested = 0;
+    reason = "優位性が不足。価格、過熱感、マクロ、資金余力のいずれかが不十分。";
+  }
+
+  const edvNeed = (price <= mainUpper && cash < monthly + emergency + taxCash) ? "EDV売却を例外検討" : "EDV売却は不要";
+  const txt =
+`【結論】
+BTC判定：${decision}
+想定購入額：${yen(suggested)}
+EDV対応：${edvNeed}
+
+【事実】
+BTC価格：${usd(price)}
+直近最高値：${usd(ath)}
+最高値からの下落率：${pct(drawdown)}
+月足RSI：${mRsi}
+週足RSI：${wRsi}
+BTC待機資金：${yen(cash)}
+
+【判断】
+${reason}
+
+【条件】
+・${usd(waitAbove)} 超では原則として新規購入を急がない
+・${usd(mainUpper)} 以下なら本命買い場候補として再判定
+・購入する場合も一括ではなく分割
+・生活防衛資金、税金資金、家族資金を圧迫しない
+・EDV売却はBTC ${usd(mainUpper)} 以下、かつ資金不足時の例外対応
+
+【注意点】
+価格、RSI、移動平均、金利、為替は手入力値。最新情報は別途確認が必要。
+この判定は売買指示ではなく、条件整理。`;
+
+  document.getElementById("btcResult").textContent = txt;
+  lastResults.BTC = txt;
+  renderBTCChecks(checks);
+  updateDashboard(decision, status);
+  return {decision, status, suggested, score, text: txt};
+}
+
+function renderBTCChecks(checks){
+  const tbody = document.getElementById("btcCheckRows");
+  tbody.innerHTML = checks.map(c=>`
+    <tr>
+      <th>${escapeHtml(c.name)}</th>
+      <td><span class="status ${c.ok ? "ok" : "danger"}">${c.ok ? "達成" : "未達"}</span></td>
+      <td>重み ${c.weight}</td>
+      <td>${escapeHtml(c.note)}</td>
+    </tr>
+  `).join("");
+}
+function volumeLabel(v){
+  return {cooling:"低下・沈静化", normal:"通常", euphoric:"過熱・急増"}[v] || v;
+}
+function macroLabel(v){
+  return {bad:"悪い", neutral:"中立", good:"良い"}[v] || v;
+}
+
+function analyzeEDV(){
+  saveAll();
+  const price = num("btcPrice");
+  const waitAbove = num("setBtcWaitAbove");
+  const mainUpper = num("setBtcMainUpper");
+  const edv = num("edvValueInput") || edvValue();
+  const policy = val("edvSellPolicy");
+  const rateDir = val("rateDirection");
+  const cash = num("btcCashAvailable");
+  const monthly = num("btcMonthlyBuy");
+  const emergency = num("setEmergencyCash");
+  const taxCash = num("setTaxCash");
+  const candidate = num("edvSellCandidate");
+
+  let decision = "保有継続";
+  let reason = "";
+  let sellAmount = 0;
+
+  if(policy === "strict"){
+    if(price <= mainUpper && cash < monthly + emergency + taxCash){
+      decision = "例外的に一部売却検討";
+      sellAmount = Math.min(candidate, edv);
+      reason = "BTCが50,000ドル以下で、待機資金が不足する場合のみEDV売却を検討する条件。";
+    } else {
+      decision = "保有継続";
+      reason = "厳格ルールでは、BTCが50,000ドル以下かつ資金不足でなければEDV売却条件を満たさない。";
+    }
+  } else if(policy === "moderate"){
+    if(price <= waitAbove && cash < monthly + emergency + taxCash){
+      decision = "一部売却検討";
+      sellAmount = Math.min(candidate, edv);
+      reason = "BTCが60,000ドル以下で資金不足の場合、資産配分調整として検討余地あり。";
+    } else {
+      decision = "保有継続寄り";
+      reason = "資金不足が明確でなければ売却不要。";
+    }
+  } else {
+    if(price <= waitAbove){
+      decision = "一部売却検討";
+      sellAmount = Math.min(candidate, edv);
+      reason = "柔軟ルールでは、BTC価格条件を満たせば検討余地あり。ただしリスクは高い。";
+    } else {
+      decision = "保有継続";
+      reason = "BTC価格条件が未達。";
+    }
+  }
+
+  if(rateDir === "down" && decision.includes("売却")){
+    reason += " ただし金利低下局面ではEDVのヘッジ価値が高まるため、売却額は抑えるべき。";
+    sellAmount = Math.round(sellAmount * 0.5);
+  }
+  if(rateDir === "up"){
+    reason += " 金利上昇局面ではEDV価格に逆風となりやすいが、ヘッジ資産としての役割は残る。";
+  }
+
+  const txt =
+`【結論】
+EDV判定：${decision}
+売却候補額：${yen(sellAmount)}
+
+【事実】
+EDV評価額：${yen(edv)}
+BTC価格：${usd(price)}
+BTC待機資金：${yen(cash)}
+金利方向：${rateDirLabel(rateDir)}
+
+【判断】
+${reason}
+
+【条件】
+・BTCを買うために安易にEDVを売らない
+・BTC ${usd(mainUpper)} 以下、または明確な資金不足時のみ例外検討
+・金利低下局面ではEDVを残す価値がある
+・売却する場合は売却額、売却後の資産配分、BTC購入計画をログに残す
+
+【注意点】
+EDV価格、為替、金利は手入力値。最新情報は別途確認が必要。`;
+
+  document.getElementById("edvResult").textContent = txt;
+  lastResults.EDV = txt;
+  return {decision, sellAmount, text: txt};
+}
+function rateDirLabel(v){
+  return {up:"上昇", flat:"横ばい", down:"低下"}[v] || v;
+}
+
+function analyzeStock(){
+  saveAll();
+  const name = val("stockName") || "未入力";
+  const eps = num("epsGrowth");
+  const sales = num("salesGrowth");
+  const roe = num("roe");
+  const balance = val("balanceQuality");
+  const moat = val("moat");
+  const chart = val("chartShape");
+  const market = val("marketTrend");
+
+  let score = 0;
+  let notes = [];
+  function scoreIf(cond, pts, msgOk, msgNg){
+    if(cond){ score += pts; notes.push("○ " + msgOk); }
+    else notes.push("× " + msgNg);
+  }
+
+  scoreIf(eps >= 20, 2, "EPS成長率はCAN SLIM候補水準", "EPS成長が弱い");
+  scoreIf(sales >= 15, 2, "売上成長は良好", "売上成長が弱い");
+  scoreIf(roe >= 15, 1, "ROEは一定水準以上", "ROEが弱い");
+  scoreIf(balance === "good", 1, "財務健全性は強い", "財務面は強いとは言えない");
+  scoreIf(moat === "strong", 2, "競争優位性が強い", "競争優位性が明確ではない");
+  scoreIf(chart === "breakout", 2, "高出来高ブレイクアウト", "ブレイクアウト条件は未達");
+  scoreIf(market === "good", 2, "市場地合いは良い", "市場地合いが十分ではない");
+
+  let decision = "見送り";
+  if(score >= 10) decision = "買い候補。ただし損切り条件必須";
+  else if(score >= 7) decision = "監視候補。ブレイクアウト待ち";
+  else decision = "見送りが妥当";
+
+  const txt =
+`【結論】
+${name}：${decision}
+スコア：${score}/12
+
+【事実】
+EPS成長率：${eps}%
+売上成長率：${sales}%
+ROE：${roe}%
+財務健全性：${qualityLabel(balance)}
+競争優位性：${moatLabel(moat)}
+チャート形状：${chartLabel(chart)}
+市場地合い：${marketLabel(market)}
+
+【判断】
+${notes.join("\n")}
+
+【条件】
+・業績成長、競争優位性、チャート、出来高、市場地合いが揃う場合のみ検討
+・水平ライン上抜けだけでは不十分
+・損切り位置、購入額、決算日、撤退条件を事前に決める
+・優位性が低ければ見送り
+
+【注意点】
+数値は手入力。決算資料、チャート、出来高、ニュースは別途確認が必要。`;
+
+  document.getElementById("stockResult").textContent = txt;
+  lastResults["個別株"] = txt;
+  return {decision, score, text: txt};
+}
+function qualityLabel(v){ return {bad:"弱い", normal:"普通", good:"強い"}[v] || v; }
+function moatLabel(v){ return {none:"不明・弱い", some:"一定あり", strong:"強い"}[v] || v; }
+function chartLabel(v){ return {bad:"崩れ", base:"ベース形成", breakout:"高出来高ブレイクアウト"}[v] || v; }
+function marketLabel(v){ return {bad:"悪い", neutral:"中立", good:"良い"}[v] || v; }
+
+
+function assetBucketSummary(){
+  const assets = getAssetsFromTable();
+  const buckets = {
+    "S&P500": 0,
+    "EDV": 0,
+    "BTC待機現金": 0,
+    "その他現金": 0,
+    "その他": 0
+  };
+  assets.forEach(a=>{
+    const name = (a.name || "").toUpperCase();
+    const type = a.type || "";
+    const memo = a.memo || "";
+    const value = Number(a.value || 0);
+    if(name.includes("S&P") || name.includes("SP500") || memo.includes("S&P")) buckets["S&P500"] += value;
+    else if(name.includes("EDV")) buckets["EDV"] += value;
+    else if(type.includes("現金") && (memo.includes("BTC") || name.includes("GMO") || name.includes("BITFLYER"))) buckets["BTC待機現金"] += value;
+    else if(type.includes("現金")) buckets["その他現金"] += value;
+    else buckets["その他"] += value;
+  });
+  return buckets;
+}
+function renderAllocationChart(){
+  const total = totalAssets();
+  const box = document.getElementById("allocationChart");
+  if(!box) return;
+  if(total <= 0){
+    box.textContent = "資産額が未入力";
+    return;
+  }
+  const buckets = assetBucketSummary();
+  const rows = Object.entries(buckets).filter(([,v])=>v>0).map(([k,v])=>{
+    const ratio = Math.round((v / total) * 1000) / 10;
+    return `<div class="allocRow">
+      <div>${escapeHtml(k)}</div>
+      <div class="allocTrack"><div class="allocBar" style="width:${Math.min(100, ratio)}%"></div></div>
+      <div class="right">${ratio.toFixed(1)}%</div>
+    </div>`;
+  }).join("");
+  box.innerHTML = rows + `<div class="small">総資産：${yen(total)}</div>`;
+}
+function runIntegrityCheck(){
+  const edvCalc = edvValue();
+  const broker = num("brokerEdvValue");
+  const tol = num("edvToleranceYen") || 100000;
+  const shares = num("edvShares");
+  const price = num("edvPrice");
+  const fx = num("usdJpy");
+  const btcPrice = num("btcPrice");
+  const btcWait = num("setBtcWaitAbove");
+  const box = document.getElementById("integrityBox");
+  let lines = [];
+
+  if(shares <= 0) lines.push("× EDV保有株数が未入力");
+  else lines.push(`○ EDV保有株数：${shares}株`);
+
+  if(price <= 0 || fx <= 0) lines.push("× EDV価格またはUSD/JPYが未取得");
+  else lines.push(`○ EDV概算：${yen(Math.round(price * shares * fx))}`);
+
+  if(broker > 0){
+    const diff = Math.abs(edvCalc - broker);
+    if(diff <= tol) lines.push(`○ 証券口座EDV評価額との差：${yen(diff)}。許容範囲内`);
+    else lines.push(`× 証券口座EDV評価額との差：${yen(diff)}。株数・為替・終値基準を確認`);
+  }else{
+    lines.push("△ 証券口座EDV評価額は未入力。必要ならAPI連携タブで入力");
+  }
+
+  if(btcPrice > btcWait) lines.push(`○ BTCは${usd(btcPrice)}で${usd(btcWait)}超。基本ルールでは原則見送り`);
+  else lines.push(`△ BTCが${usd(btcWait)}以下。購入条件チェックが必要`);
+
+  const result = lines.join("\n");
+  if(box) box.innerHTML = result
+    .replaceAll("○", "<span class='okText'>○</span>")
+    .replaceAll("△", "<span class='warnText'>△</span>")
+    .replaceAll("×", "<span class='dangerText'>×</span>")
+    .replaceAll("\n","<br>");
+  return result;
+}
+function runPretradeCheck(){
+  const ids = ["chkPrice","chkSplit","chkCash","chkReason","chkExit","chkEdv","chkTomorrow"];
+  const checked = ids.filter(id => document.getElementById(id)?.checked).length;
+  const reason = val("pretradeReason").trim();
+  const exit = val("pretradeExit").trim();
+  const action = val("pretradeAction");
+  const target = val("pretradeTarget");
+  const amount = num("pretradeAmount");
+  let status = "見送り優先";
+  let notes = [];
+
+  if(checked < ids.length) notes.push(`未チェック項目あり：${ids.length - checked}件`);
+  if(!reason) notes.push("判断理由が未入力");
+  if(!exit) notes.push("撤退条件・追加条件が未入力");
+  if(action !== "見送り" && amount <= 0) notes.push("実行予定金額が未入力");
+  if(target === "BTC" && action !== "見送り" && num("btcPrice") > num("setBtcWaitAbove")){
+    notes.push("BTC価格が60,000ドル超。基本ルールでは原則見送り");
+  }
+
+  if(notes.length === 0){
+    status = "実行条件は形式上クリア";
+  }else if(action === "見送り"){
+    status = "見送りとして妥当";
+  }
+
+  setVal("pretradeStatus", status);
+  const txt =
+`【点検結果】
+${status}
+
+【対象】
+${target}
+
+【予定行動】
+${action}
+
+【予定金額】
+${yen(amount)}
+
+【未解決事項】
+${notes.length ? notes.map(x => "・" + x).join("\n") : "・なし"}
+
+【判断】
+売買前点検は、実行を推奨するものではない。
+条件が不完全な場合は見送りを優先する。`;
+  document.getElementById("pretradeResult").textContent = txt;
+  return txt;
+}
+function addPretradeLog(){
+  const txt = runPretradeCheck() + "\n\n【判断理由】\n" + val("pretradeReason") + "\n\n【撤退条件・追加条件】\n" + val("pretradeExit");
+  logs.unshift({
+    datetime: nowString(),
+    target: val("pretradeTarget"),
+    decision: val("pretradeStatus"),
+    amount: num("pretradeAmount"),
+    reason: txt
+  });
+  saveAll();
+  renderLogs();
+  const logTab = document.querySelector('.tab[data-tab="log"]');
+  if(logTab) logTab.click();
+}
+function resetPretradeChecks(){
+  ["chkPrice","chkSplit","chkCash","chkReason","chkExit","chkEdv","chkTomorrow"].forEach(id=>{
+    const el = document.getElementById(id);
+    if(el) el.checked = false;
+  });
+  setVal("pretradeStatus", "未点検");
+  document.getElementById("pretradeResult").textContent = "未点検";
+}
+
+
+
+const tickerAliasMap = {
+  "NVIDIA":"NVDA", "NVDA":"NVDA",
+  "MICROSOFT":"MSFT", "MSFT":"MSFT",
+  "APPLE":"AAPL", "AAPL":"AAPL",
+  "AMAZON":"AMZN", "AMZN":"AMZN",
+  "GOOGLE":"GOOGL", "ALPHABET":"GOOGL", "GOOGL":"GOOGL", "GOOG":"GOOG",
+  "META":"META", "FACEBOOK":"META",
+  "TESLA":"TSLA", "TSLA":"TSLA",
+  "BROADCOM":"AVGO", "AVGO":"AVGO",
+  "PALANTIR":"PLTR", "PLTR":"PLTR",
+  "NETFLIX":"NFLX", "NFLX":"NFLX",
+  "AMD":"AMD",
+  "ARM":"ARM",
+  "COSTCO":"COST", "COST":"COST",
+  "BERKSHIRE":"BRK.B", "BRK.B":"BRK.B",
+  "JX金属":"5016.T", "JX METALS":"5016.T"
+};
+function resolveTicker(input){
+  const raw = String(input || "").trim();
+  if(!raw) return "";
+  const upper = raw.toUpperCase().replaceAll("　"," ");
+  if(tickerAliasMap[upper]) return tickerAliasMap[upper];
+  if(tickerAliasMap[raw]) return tickerAliasMap[raw];
+  return upper;
+}
+function quickSyncToMain(){
+  const qKey = val("quickAlphaKey").trim();
+  if(qKey) setVal("alphaKey", qKey);
+  const qShares = num("quickEdvShares");
+  if(qShares > 0) setVal("edvShares", qShares);
+  const qDelay = num("quickAlphaDelay");
+  if(qDelay > 0) setVal("alphaDelaySec", qDelay);
+  const qDate = document.getElementById("quickLogDate");
+  if(qDate && !qDate.value) qDate.value = todayString();
+  saveAll();
+}
+function quickRefreshSummary(){
+  const btcResult = document.getElementById("btcResult")?.textContent || "";
+  const edvResult = document.getElementById("edvResult")?.textContent || "";
+  const btcDecision = (btcResult.match(/BTC判定：(.+)/) || [,"-"])[1].trim();
+  const edvDecision = (edvResult.match(/EDV判定：(.+)/) || [,"-"])[1].trim();
+
+  setCell("quickBtcPrice", usd(num("btcPrice")));
+  const qbd = document.getElementById("quickBtcDecision");
+  if(qbd) qbd.innerHTML = `<span class="status ${btcDecision.includes("見送り") ? "danger" : "warn"}">${escapeHtml(btcDecision)}</span>`;
+  setCell("quickEdvValue", yen(edvValue()));
+  const qed = document.getElementById("quickEdvDecision");
+  if(qed) qed.innerHTML = `<span class="status ${edvDecision.includes("保有") ? "ok" : "warn"}">${escapeHtml(edvDecision)}</span>`;
+  const qbr = document.getElementById("quickBtcResult");
+  if(qbr) qbr.textContent = btcResult || "未判定";
+  const qer = document.getElementById("quickEdvResult");
+  if(qer) qer.textContent = edvResult || "未判定";
+  const qstat = document.getElementById("quickApiStatus");
+  if(qstat) qstat.value = val("apiStatus");
+  const qlast = document.getElementById("quickLastUpdate");
+  if(qlast) qlast.value = val("apiLastUpdate");
+}
+async function quickFetchAll(){
+  quickSyncToMain();
+  await fetchAllMarketData();
+  runAll();
+  quickRefreshSummary();
+}
+async function quickFetchStock(){
+  try{
+    quickSyncToMain();
+    const input = val("quickStockInput") || val("stockName") || val("stockTicker");
+    const ticker = resolveTicker(input);
+    if(!ticker) throw new Error("銘柄名またはティッカーが未入力");
+    setVal("quickResolvedTicker", ticker);
+    setVal("stockTicker", ticker);
+    setVal("stockName", input);
+    setApiStatus(`${ticker} 取得中`);
+    const q = await fetchAlphaGlobalQuote(ticker);
+    setVal("quickStockPrice", q.price.toFixed(2));
+    setVal("quickStockChange", q.changePct);
+    setVal("quickStockDate", q.date);
+    setVal("stockApiPrice", q.price.toFixed(2));
+    setVal("stockApiChange", q.changePct);
+    setCell("apiStockPrice", `${ticker}: ${q.price.toFixed(2)} USD / ${q.changePct}`);
+    setCell("apiStockDate", q.date);
+    setApiStatus(`${ticker} 取得完了`);
+    saveAll();
+  }catch(e){
+    setApiStatus("個別株取得失敗");
+    alert("個別株API取得に失敗した。\\n\\n対処：NVIDIAではなくNVDA、MicrosoftではなくMSFTのようにティッカーで試す。\\n日本株はAlpha Vantageで取得できない場合がある。\\n\\n詳細：" + e.message);
+  }
+}
+function quickAddStockLog(){
+  const txt = quickAnalyzeStock();
+  logs.unshift({
+    datetime: nowString(),
+    target: "推奨候補",
+    decision: (txt.match(/：(.+)/) || [,"要確認"])[1].trim(),
+    amount: 0,
+    reason: txt
+  });
+  saveAll();
+  renderLogs();
+}
+function quickFillTodayHoldLog(){
+  runAll();
+  quickRefreshSummary();
+  const btc = num("btcPrice");
+  const ath = num("btcAth");
+  const dd = ath > 0 ? ((ath - btc) / ath * 100).toFixed(1) : "-";
+  const edv = edvValue();
+  const txt = `BTC価格は${usd(btc)}で、事前条件の60,000ドル以下を満たしていない。最高値からの下落率は約${dd}%。
+上昇しているから買う局面ではなく、過去サイクル・価格条件・資金管理上、現時点では見送りが妥当。
+EDVは${num("edvShares")}株、評価額概算${yen(edv)}。BTC購入条件が来ていないため、EDV売却は行わない。
+次回はBTCが60,000ドル以下、または相場環境が大きく変化した場合に再判定する。`;
+  setVal("quickLogTarget", "BTC");
+  setVal("quickLogDecision", "見送り");
+  setVal("quickLogAmount", 0);
+  setVal("quickLogReason", txt);
+  const qDate = document.getElementById("quickLogDate");
+  if(qDate) qDate.value = todayString();
+}
+function quickAddManualLog(){
+  const entry = {
+    datetime: val("quickLogDate") || todayString(),
+    target: val("quickLogTarget"),
+    decision: val("quickLogDecision"),
+    amount: num("quickLogAmount"),
+    reason: val("quickLogReason")
+  };
+  logs.unshift(entry);
+  saveAll();
+  renderLogs();
+}
+
+
+
+let lastChartAnalysisText = "";
+let lastChartSeries = [];
+
+function movingAverage(values, period){
+  const out = new Array(values.length).fill(null);
+  let sum = 0;
+  for(let i=0;i<values.length;i++){
+    sum += values[i];
+    if(i >= period) sum -= values[i-period];
+    if(i >= period-1) out[i] = sum / period;
+  }
+  return out;
+}
+function rsi(values, period=14){
+  if(values.length < period + 1) return null;
+  let gains = 0, losses = 0;
+  for(let i=1;i<=period;i++){
+    const d = values[i] - values[i-1];
+    if(d >= 0) gains += d; else losses -= d;
+  }
+  let avgGain = gains / period;
+  let avgLoss = losses / period;
+  for(let i=period+1;i<values.length;i++){
+    const d = values[i] - values[i-1];
+    const gain = d > 0 ? d : 0;
+    const loss = d < 0 ? -d : 0;
+    avgGain = (avgGain * (period - 1) + gain) / period;
+    avgLoss = (avgLoss * (period - 1) + loss) / period;
+  }
+  if(avgLoss === 0) return 100;
+  const rs = avgGain / avgLoss;
+  return 100 - (100 / (1 + rs));
+}
+function fmtPrice(v, isUsd=true){
+  if(v == null || !isFinite(v)) return "-";
+  if(isUsd) return "$" + Number(v).toLocaleString("en-US", {maximumFractionDigits:2});
+  return Number(v).toLocaleString("ja-JP", {maximumFractionDigits:2});
+}
+function setInputOrText(id, value){
+  const el = document.getElementById(id);
+  if(!el) return;
+  if("value" in el) el.value = value;
+  else el.textContent = value;
+}
+function resolveChartSymbol(){
+  const target = val("quickChartTarget");
+  const raw = val("quickChartSymbol").trim();
+  if(target === "BTC") return {kind:"crypto", symbol: raw || "bitcoin", label:"BTC"};
+  if(target === "EDV") return {kind:"equity", symbol:"EDV", label:"EDV"};
+  if(target === "STOCK") return {kind:"equity", symbol: resolveTicker(raw || val("quickStockInput") || val("stockTicker")), label: raw || val("quickStockInput") || val("stockTicker")};
+  if((raw || "").toLowerCase() === "bitcoin" || (raw || "").toUpperCase() === "BTC") return {kind:"crypto", symbol:"bitcoin", label:"BTC"};
+  return {kind:"equity", symbol: resolveTicker(raw), label: raw};
+}
+async function fetchBTCMarketChart(days){
+  const headers = coingeckoHeaders();
+  const url = `https://api.coingecko.com/api/v3/coins/bitcoin/market_chart?vs_currency=usd&days=${encodeURIComponent(days)}`;
+  const data = await fetchJson(url, {headers});
+  if(!Array.isArray(data.prices)) throw new Error("BTC履歴データが空");
+  return data.prices.map(p => ({
+    date: new Date(p[0]).toISOString().slice(0,10),
+    close: Number(p[1]),
+    volume: null
+  })).filter(x => isFinite(x.close));
+}
+async function fetchAlphaDailySeries(symbol, outputsize="full"){
+  const key = alphaKey();
+  const url = `https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=${encodeURIComponent(symbol)}&outputsize=${outputsize}&apikey=${encodeURIComponent(key)}`;
+  const data = await fetchJsonWithRetry(url, {}, `${symbol} 日足`);
+  const series = data["Time Series (Daily)"];
+  if(!series) throw new Error(`${symbol} の日足データが空`);
+  return Object.keys(series).sort().map(d => ({
+    date: d,
+    close: Number(series[d]["4. close"]),
+    high: Number(series[d]["2. high"]),
+    low: Number(series[d]["3. low"]),
+    volume: Number(series[d]["5. volume"])
+  })).filter(x => isFinite(x.close));
+}
+function sliceDays(series, days){
+  const n = Number(days || 365);
+  if(series.length <= n) return series;
+  return series.slice(series.length - n);
+}
+function drawChart(series, ma50, ma200, label){
+  const canvas = document.getElementById("quickChartCanvas");
+  if(!canvas || !series.length) return;
+  const rect = canvas.getBoundingClientRect();
+  const dpr = window.devicePixelRatio || 1;
+  canvas.width = Math.max(600, Math.floor(rect.width * dpr));
+  canvas.height = Math.floor(360 * dpr);
+  const ctx = canvas.getContext("2d");
+  const W = canvas.width, H = canvas.height;
+  const padL = 60*dpr, padR = 20*dpr, padT = 24*dpr, padB = 34*dpr;
+  ctx.clearRect(0,0,W,H);
+  ctx.fillStyle = "#ffffff";
+  ctx.fillRect(0,0,W,H);
+
+  const vals = [];
+  series.forEach(x=>vals.push(x.close));
+  ma50.forEach(x=>{ if(x!=null) vals.push(x); });
+  ma200.forEach(x=>{ if(x!=null) vals.push(x); });
+  let min = Math.min(...vals), max = Math.max(...vals);
+  const margin = (max-min)*0.08 || max*0.05 || 1;
+  min -= margin; max += margin;
+  const xOf = i => padL + (i/(series.length-1 || 1))*(W-padL-padR);
+  const yOf = v => padT + (max-v)/(max-min)*(H-padT-padB);
+
+  // grid
+  ctx.strokeStyle = "#e5e7eb";
+  ctx.lineWidth = 1*dpr;
+  ctx.font = `${11*dpr}px sans-serif`;
+  ctx.fillStyle = "#6b7280";
+  for(let g=0; g<=4; g++){
+    const y = padT + g*(H-padT-padB)/4;
+    ctx.beginPath(); ctx.moveTo(padL, y); ctx.lineTo(W-padR, y); ctx.stroke();
+    const val = max - g*(max-min)/4;
+    ctx.fillText(val.toFixed(2), 6*dpr, y+4*dpr);
+  }
+
+  function line(data, color, width=2){
+    ctx.strokeStyle = color;
+    ctx.lineWidth = width*dpr;
+    ctx.beginPath();
+    let started = false;
+    data.forEach((v,i)=>{
+      if(v == null || !isFinite(v)) return;
+      const x = xOf(i), y = yOf(v);
+      if(!started){ ctx.moveTo(x,y); started = true; }
+      else ctx.lineTo(x,y);
+    });
+    ctx.stroke();
+  }
+  line(series.map(x=>x.close), "#111827", 2.2);
+  line(ma50, "#2563eb", 1.4);
+  line(ma200, "#dc2626", 1.4);
+
+  ctx.fillStyle = "#111827";
+  ctx.font = `${13*dpr}px sans-serif`;
+  ctx.fillText(`${label} price / MA50 / MA200`, padL, 16*dpr);
+  ctx.fillStyle = "#111827"; ctx.fillText("価格", W-220*dpr, 18*dpr);
+  ctx.fillStyle = "#2563eb"; ctx.fillText("MA50", W-160*dpr, 18*dpr);
+  ctx.fillStyle = "#dc2626"; ctx.fillText("MA200", W-95*dpr, 18*dpr);
+
+  const first = series[0]?.date || "";
+  const last = series[series.length-1]?.date || "";
+  ctx.fillStyle = "#6b7280";
+  ctx.font = `${11*dpr}px sans-serif`;
+  ctx.fillText(first, padL, H-10*dpr);
+  ctx.fillText(last, W-105*dpr, H-10*dpr);
+}
+function analyzeTechSeries(series, label, isBTC=false){
+  if(!series || series.length < 20) throw new Error("分析に必要なデータ数が不足");
+  const closes = series.map(x=>x.close);
+  const ma50 = movingAverage(closes, 50);
+  const ma200 = movingAverage(closes, 200);
+  const last = closes[closes.length-1];
+  const lastMa50 = ma50[ma50.length-1];
+  const lastMa200 = ma200[ma200.length-1];
+  const r = rsi(closes, 14);
+  const lookback = series.slice(Math.max(0, series.length-90));
+  const support = Math.min(...lookback.map(x=>x.low || x.close));
+  const resistance = Math.max(...lookback.map(x=>x.high || x.close));
+  const periodHigh = Math.max(...closes);
+  const dd = periodHigh > 0 ? (periodHigh - last) / periodHigh * 100 : 0;
+
+  let trend = "中立";
+  if(lastMa50 && lastMa200 && last > lastMa50 && lastMa50 > lastMa200) trend = "上昇基調";
+  else if(lastMa50 && lastMa200 && last < lastMa50 && lastMa50 < lastMa200) trend = "下落基調";
+  else if(lastMa50 && last > lastMa50) trend = "短期は強いが判定は中立";
+  else if(lastMa50 && last < lastMa50) trend = "短期は弱い";
+
+  let heat = "中立";
+  if(r != null && r >= 70) heat = "過熱";
+  else if(r != null && r <= 30) heat = "売られ過ぎ";
+  else if(r != null && r <= 45) heat = "過熱感は弱い";
+
+  let decision = "監視";
+  let comment = "";
+  if(isBTC){
+    if(last > num("setBtcWaitAbove")){
+      decision = "BTCは原則見送り";
+      comment = "価格条件が未達。上昇基調でも高値追いは避ける。";
+    }else if(r != null && r < 55){
+      decision = "BTCは再判定候補";
+      comment = "価格条件に入り、過熱感も限定的なら分割購入条件を確認する。";
+    }else{
+      decision = "BTCは条件付き監視";
+      comment = "価格条件だけでなく、RSI、出来高、マクロ、資金余力を確認する。";
+    }
+  }else{
+    if(trend === "上昇基調" && heat !== "過熱") {
+      decision = "監視候補";
+      comment = "トレンドは悪くない。ただし業績、出来高、ベース形成、地合い確認が必要。";
+    }else if(heat === "過熱"){
+      decision = "高値追い注意";
+      comment = "過熱感がある。ブレイクアウト後のだましや押し目を警戒。";
+    }else if(trend === "下落基調"){
+      decision = "見送り優勢";
+      comment = "移動平均線の並びが弱い。CAN SLIM的には買いにくい。";
+    }else{
+      decision = "監視継続";
+      comment = "チャート単体では強い優位性は断定できない。";
+    }
+  }
+
+  setInputOrText("techLastPrice", fmtPrice(last));
+  setInputOrText("techMa50", fmtPrice(lastMa50));
+  setInputOrText("techMa200", fmtPrice(lastMa200));
+  setInputOrText("techRsi", r == null ? "-" : r.toFixed(1));
+
+  const text =
+`【結論】
+${label}：${decision}
+
+【テクニカル】
+終値：${fmtPrice(last)}
+MA50：${fmtPrice(lastMa50)}
+MA200：${fmtPrice(lastMa200)}
+RSI14：${r == null ? "-" : r.toFixed(1)}
+90日支持線目安：${fmtPrice(support)}
+90日抵抗線目安：${fmtPrice(resistance)}
+期間高値からの下落率：${dd.toFixed(1)}%
+トレンド：${trend}
+過熱感：${heat}
+
+【判断】
+${comment}
+
+【注意点】
+これはチャート条件の整理であり、売買指示ではない。
+個別株は業績成長、出来高、地合い、決算日、損切り位置を別途確認する。`;
+
+  lastChartAnalysisText = text;
+  return {text, ma50, ma200, last, r, trend, heat, support, resistance, dd};
+}
+async function quickFetchChartAndAnalyze(){
+  try{
+    const target = resolveChartSymbol();
+    const days = val("quickChartDays") || "365";
+    setInputOrText("quickChartStatus", "取得中");
+    let series;
+    if(target.kind === "crypto"){
+      series = await fetchBTCMarketChart(days);
+    }else{
+      if(!target.symbol) throw new Error("ティッカーが未入力");
+      const raw = await fetchAlphaDailySeries(target.symbol, Number(days) > 120 ? "full" : "compact");
+      series = sliceDays(raw, Number(days));
+    }
+    if(!series.length) throw new Error("チャートデータが空");
+    lastChartSeries = series;
+    const closes = series.map(x=>x.close);
+    const ma50 = movingAverage(closes, 50);
+    const ma200 = movingAverage(closes, 200);
+    drawChart(series, ma50, ma200, target.label || target.symbol);
+    const result = analyzeTechSeries(series, target.label || target.symbol, target.kind === "crypto");
+    document.getElementById("quickTechResult").textContent = result.text;
+    setInputOrText("quickChartStatus", "取得・分析完了");
+    saveAll();
+  }catch(e){
+    setInputOrText("quickChartStatus", "取得失敗");
+    alert("チャート取得・分析に失敗した。\\n\\nBTCはCoinGecko、株式/ETFはAlpha Vantageの日足を使う。Alpha Vantage無料枠に当たった場合は時間を空ける。\\n\\n詳細：" + e.message);
+  }
+}
+function quickAddChartLog(){
+  if(!lastChartAnalysisText) {
+    alert("先にチャート取得・分析を実行する。");
+    return;
+  }
+  logs.unshift({
+    datetime: nowString(),
+    target: val("quickChartTarget"),
+    decision: (lastChartAnalysisText.match(/：(.+)/) || [,"チャート分析"])[1].trim(),
+    amount: 0,
+    reason: lastChartAnalysisText
+  });
+  saveAll();
+  renderLogs();
+}
+
+
+let lastRecommendationText = "";
+
+function autoStockScoreFromInputs(prefix="quick"){
+  const eps = num(prefix + "EpsGrowth");
+  const sales = num(prefix + "SalesGrowth");
+  const roeVal = num(prefix + "Roe");
+  const balance = val(prefix + "BalanceQuality");
+  const moatVal = val(prefix + "Moat");
+  const chart = val(prefix + "ChartShape");
+  const market = val(prefix + "MarketTrend");
+
+  let score = 0;
+  let reasons = [];
+  function add(cond, pts, ok, ng){
+    if(cond){ score += pts; reasons.push("○ " + ok); }
+    else reasons.push("× " + ng);
+  }
+
+  add(eps >= 20, 2, "EPS成長率20%以上", "EPS成長が20%未満");
+  add(sales >= 15, 2, "売上成長率15%以上", "売上成長が15%未満");
+  add(roeVal >= 15, 1, "ROE15%以上", "ROEが15%未満");
+  add(balance === "good", 1, "財務健全性が強い", "財務健全性は強いとは言えない");
+  add(moatVal === "strong", 2, "競争優位性が強い", "競争優位性が明確ではない");
+  add(chart === "breakout", 2, "高出来高ブレイクアウト", "ブレイクアウト条件は未達");
+  add(market === "good", 2, "市場地合いが良い", "市場地合いが十分ではない");
+
+  let label = "見送り";
+  if(score >= 10) label = "推奨候補A";
+  else if(score >= 7) label = "推奨候補B";
+  else if(score >= 5) label = "監視継続";
+  else label = "見送り";
+
+  return {score, max:12, label, reasons};
+}
+
+function quickAnalyzeStock(){
+  const input = val("quickStockInput");
+  const ticker = resolveTicker(input);
+  setVal("quickResolvedTicker", ticker);
+  setVal("stockName", input || ticker);
+  setVal("stockTicker", ticker);
+  setVal("epsGrowth", num("quickEpsGrowth"));
+  setVal("salesGrowth", num("quickSalesGrowth"));
+  setVal("roe", num("quickRoe"));
+  setVal("balanceQuality", val("quickBalanceQuality"));
+  setVal("moat", val("quickMoat"));
+  setVal("chartShape", val("quickChartShape"));
+  setVal("marketTrend", val("quickMarketTrend"));
+  setVal("stockMemo", val("quickStockMemo"));
+
+  const s = autoStockScoreFromInputs("quick");
+  const price = val("quickStockPrice") || val("stockApiPrice") || "-";
+  const change = val("quickStockChange") || val("stockApiChange") || "-";
+
+  const txt =
+`【結論】
+${input || ticker}：${s.label}
+条件一致スコア：${s.score}/${s.max}
+
+【株価】
+ティッカー：${ticker || "-"}
+API株価：${price}
+変化率：${change}
+
+【自動判定】
+${s.reasons.join("\n")}
+
+【判断】
+この表示は買い推奨ではなく、条件一致度が高い推奨候補の抽出。
+推奨候補Aでも、決算日、出来高、地合い、損切り位置、資金量を確認するまでは買わない。
+
+【注意点】
+業績・財務・競争優位性は手入力を含む。
+チャートだけ、または株価上昇だけでは買い判断にしない。`;
+
+  const box = document.getElementById("quickStockResult");
+  if(box) box.textContent = txt;
+  lastResults["個別株"] = txt;
+  saveAll();
+  return txt;
+}
+
+async function autoScreenRecommendations(){
+  const listText = val("quickRecommendList");
+  const names = listText.split(/\n|,|、/).map(x=>x.trim()).filter(Boolean);
+  const threshold = Number(val("recommendThreshold") || 7);
+  if(!names.length){
+    alert("対象リストが空。");
+    return;
+  }
+  setVal("recommendStatus", "判定中");
+  const rows = [];
+  const baseScore = autoStockScoreFromInputs("quick"); // Current condition template
+  for(const name of names){
+    const ticker = resolveTicker(name);
+    let apiPrice = "-";
+    let apiChange = "-";
+    let apiOk = false;
+    try{
+      // Avoid heavy continuous calls: use price only. If API limit hits, continue with manual score.
+      const q = await fetchAlphaGlobalQuote(ticker);
+      apiPrice = q.price.toFixed(2);
+      apiChange = q.changePct || "-";
+      apiOk = true;
+      await sleep(Math.max(1000, Number(val("alphaDelaySec") || val("quickAlphaDelay") || 10) * 1000));
+    }catch(e){
+      apiPrice = "取得失敗";
+      apiChange = "-";
+    }
+
+    // Apply base score from current user's criteria.
+    // Add a small technical placeholder only if API price succeeded; true technical score is chart analysis.
+    let score = baseScore.score;
+    let note = baseScore.label;
+    if(apiOk) score += 1;
+    const label = score >= threshold + 3 ? "推奨候補A" : score >= threshold ? "推奨候補B" : score >= 5 ? "監視継続" : "見送り";
+    rows.push({name, ticker, price: apiPrice, change: apiChange, score, label});
+  }
+
+  rows.sort((a,b)=>b.score-a.score);
+  const lines = rows.map((r,i)=>`${i+1}. ${r.name} / ${r.ticker}：${r.label}　スコア ${r.score}/13　株価 ${r.price}　変化率 ${r.change}`);
+  const txt =
+`【結論】
+推奨候補スクリーニング結果
+
+【上位候補】
+${lines.join("\n")}
+
+【判定ルール】
+現在の一画面運用に入力されているEPS成長率、売上成長率、ROE、財務、競争優位性、チャート、市場地合いを基準に自動採点。
+株価API取得に成功した銘柄は確認済みとして+1。
+これは買い推奨ではなく、調査優先順位の整理。
+
+【次に確認】
+・決算日
+・出来高を伴う上抜けか
+・週足/月足の形
+・市場全体の地合い
+・損切り位置
+・資金量`;
+
+  lastRecommendationText = txt;
+  const box = document.getElementById("recommendResult");
+  if(box) textContentSafe(box, txt);
+  setVal("recommendStatus", "判定完了");
+  saveAll();
+}
+function textContentSafe(el, txt){
+  if(el) el.textContent = txt;
+}
+function addRecommendationLog(){
+  if(!lastRecommendationText){
+    alert("先に推奨候補を自動判定する。");
+    return;
+  }
+  logs.unshift({
+    datetime: nowString(),
+    target: "推奨候補",
+    decision: "条件一致スクリーニング",
+    amount: 0,
+    reason: lastRecommendationText
+  });
+  saveAll();
+  renderLogs();
+}
+
+function runAll(){
+  const btc = analyzeBTC();
+  analyzeEDV();
+  analyzeStock();
+  updateDashboard(btc.decision, btc.status);
+  quickRefreshSummary();
+}
+function updateDashboard(btcDecision, btcStatus){
+  const total = totalAssets();
+  const cash = btcCash();
+  const edv = edvValue();
+  document.getElementById("dashTotal").textContent = yen(total);
+  document.getElementById("dashBtcCash").textContent = yen(cash);
+  document.getElementById("dashEdv").textContent = yen(edv);
+
+  let status = btcStatus || "neutral";
+  let decision = btcDecision || "未判定";
+  document.getElementById("dashBtcStatus").innerHTML = `<span class="status ${status}">${escapeHtml(decision)}</span>`;
+
+  const price = num("btcPrice");
+  const waitAbove = num("setBtcWaitAbove");
+  const mainUpper = num("setBtcMainUpper");
+  const emergency = num("setEmergencyCash");
+  const taxCash = num("setTaxCash");
+  const summary =
+`【結論】
+現在の優先は、BTCの条件到達待ちと判断ログの蓄積。
+
+【資産】
+総資産：${yen(total)}
+BTC待機資金：${yen(cash)}
+EDV：${yen(edv)}
+
+【BTC】
+現在価格：${usd(price)}
+原則ライン：${usd(waitAbove)}
+本命候補：${usd(mainUpper)}
+現在判定：${decision}
+
+【資金安全性】
+生活防衛資金：${yen(emergency)}
+税金用現金：${yen(taxCash)}
+投資不可資金を除いた余力確認が必要。`;
+  document.getElementById("dashboardSummary").textContent = summary;
+
+  const priority = [];
+  if(price > waitAbove) priority.push("BTCは60,000ドル超なら原則として急がない。");
+  if(price <= waitAbove) priority.push("BTCが価格条件に入った。RSI、出来高、マクロ、資金余力を再確認。");
+  if(cash < emergency + taxCash) priority.push("BTC待機資金が防衛資金・税金資金に食い込む可能性あり。");
+  priority.push("売買前に、なぜ買うか・なぜ売るか・撤退条件をログに残す。");
+  priority.push("個別株は水平ライン上抜けだけでなく、業績・出来高・地合いを確認。");
+  document.getElementById("priorityList").innerHTML = priority.map(x=>`<li>${escapeHtml(x)}</li>`).join("");
+  renderAllocationChart();
+  runIntegrityCheck();
+}
+
+
+function setApiStatus(message, kind="neutral"){
+  const el = document.getElementById("apiStatus");
+  if(el) el.value = message;
+}
+function markApiUpdated(){
+  const s = nowString();
+  setVal("apiLastUpdate", s);
+}
+function sleep(ms){
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+function isRateLimitMessage(msg){
+  return /request|rate|premium|frequency|minute|day|second|spreading/i.test(String(msg || ""));
+}
+async function fetchJson(url, options={}){
+  const res = await fetch(url, options);
+  if(!res.ok) throw new Error(`HTTP ${res.status}`);
+  const data = await res.json();
+  const msg = data.Note || data.Information || data["Error Message"];
+  if(msg) {
+    const err = new Error(msg);
+    err.apiMessage = msg;
+    throw err;
+  }
+  return data;
+}
+async function fetchJsonWithRetry(url, options={}, label="API"){
+  try{
+    return await fetchJson(url, options);
+  }catch(e){
+    if(isRateLimitMessage(e.message)){
+      setApiStatus(`${label} 制限回避待機中`);
+      const waitMs = Math.max(5000, Number(val("alphaDelaySec") || 3) * 1000 * 2);
+      await sleep(waitMs);
+      return await fetchJson(url, options);
+    }
+    throw e;
+  }
+}
+function setCell(id, value){
+  const el = document.getElementById(id);
+  if(el) el.textContent = value;
+}
+function coingeckoHeaders(){
+  const key = val("coingeckoKey").trim();
+  return key ? {"x-cg-demo-api-key": key} : {};
+}
+async function fetchBTCFromCoinGecko(){
+  try{
+    setApiStatus("BTC取得中");
+    const headers = coingeckoHeaders();
+    const simpleUrl = "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd,jpy&include_24hr_change=true&include_24hr_vol=true&include_last_updated_at=true";
+    const data = await fetchJson(simpleUrl, {headers});
+    if(!data.bitcoin || !data.bitcoin.usd) throw new Error("CoinGecko BTC価格の形式が想定外");
+    const b = data.bitcoin;
+
+    setVal("btcPrice", Math.round(Number(b.usd)));
+    setCell("apiBtcUsd", usd(b.usd));
+    setCell("apiBtcJpy", yen(Math.round(Number(b.jpy || 0))));
+    setCell("apiBtcChange", isFinite(b.usd_24h_change) ? Number(b.usd_24h_change).toFixed(2) + "%" : "-");
+
+    try{
+      const detailUrl = "https://api.coingecko.com/api/v3/coins/bitcoin?localization=false&tickers=false&market_data=true&community_data=false&developer_data=false&sparkline=false";
+      const detail = await fetchJson(detailUrl, {headers});
+      const ath = detail?.market_data?.ath?.usd;
+      if(ath){
+        setVal("btcAth", Math.round(Number(ath)));
+        setCell("apiBtcAth", usd(ath));
+      }
+    }catch(e){
+      setCell("apiBtcAth", "取得失敗。手入力値を使用");
+    }
+
+    markApiUpdated();
+    setApiStatus("BTC取得完了");
+    saveAll();
+    analyzeBTC();
+  }catch(e){
+    setApiStatus("BTC取得失敗");
+    alert("BTC API取得に失敗した。手入力値を使う。\n" + e.message);
+  }
+}
+
+function alphaKey(){
+  const key = val("alphaKey").trim();
+  if(!key) throw new Error("Alpha Vantage APIキーが未入力");
+  return key;
+}
+async function fetchAlphaGlobalQuote(symbol){
+  const key = alphaKey();
+  const url = `https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=${encodeURIComponent(symbol)}&apikey=${encodeURIComponent(key)}`;
+  const data = await fetchJsonWithRetry(url, {}, symbol);
+  const q = data["Global Quote"];
+  if(!q || !q["05. price"]) throw new Error(`${symbol} のGLOBAL_QUOTE取得結果が空`);
+  return {
+    symbol,
+    price: Number(q["05. price"]),
+    changePct: q["10. change percent"] || "",
+    date: q["07. latest trading day"] || ""
+  };
+}
+async function fetchAlphaUsdJpy(){
+  const key = alphaKey();
+  const url = `https://www.alphavantage.co/query?function=CURRENCY_EXCHANGE_RATE&from_currency=USD&to_currency=JPY&apikey=${encodeURIComponent(key)}`;
+  const data = await fetchJsonWithRetry(url, {}, "USD/JPY");
+  const r = data["Realtime Currency Exchange Rate"];
+  if(!r || !r["5. Exchange Rate"]) throw new Error("USD/JPY取得結果が空");
+  return Number(r["5. Exchange Rate"]);
+}
+async function fetchAlphaTreasury10Y(){
+  const key = alphaKey();
+  const url = `https://www.alphavantage.co/query?function=TREASURY_YIELD&interval=daily&maturity=10year&apikey=${encodeURIComponent(key)}`;
+  const data = await fetchJsonWithRetry(url, {}, "米10年金利");
+  if(!Array.isArray(data.data)) throw new Error("米10年金利取得結果が空");
+  const latest = data.data.find(x => x.value && x.value !== ".");
+  if(!latest) throw new Error("米10年金利の有効値がない");
+  return {date: latest.date, value: Number(latest.value)};
+}
+function updateAssetValueByName(keyword, newValue){
+  const rows = [...document.querySelectorAll("#assetTable tbody tr")];
+  for(const row of rows){
+    const inputs = row.querySelectorAll("input,textarea");
+    if(inputs[1] && String(inputs[1].value).toUpperCase().includes(keyword.toUpperCase())){
+      inputs[2].value = Math.round(newValue);
+      return true;
+    }
+  }
+  return false;
+}
+async function fetchAlphaCore(){
+  const errors = [];
+  try{
+    setApiStatus("Alpha Vantage取得中");
+    const delayMs = Math.max(1000, Number(val("alphaDelaySec") || 3) * 1000);
+
+    let usdjpy = 0;
+    try{
+      setApiStatus("USD/JPY取得中");
+      usdjpy = await fetchAlphaUsdJpy();
+      setVal("usdJpy", usdjpy.toFixed(3));
+      setCell("apiUsdJpy", usdjpy.toFixed(3));
+    }catch(e){
+      errors.push("USD/JPY: " + e.message);
+      setCell("apiUsdJpy", "取得失敗");
+    }
+
+    await sleep(delayMs);
+
+    let edv = null;
+    try{
+      setApiStatus("EDV取得中");
+      edv = await fetchAlphaGlobalQuote("EDV");
+      setVal("edvPrice", edv.price.toFixed(2));
+      setCell("apiEdvPrice", `${edv.price.toFixed(2)} USD / ${edv.date}`);
+    }catch(e){
+      errors.push("EDV: " + e.message);
+      setCell("apiEdvPrice", "取得失敗");
+    }
+
+    await sleep(delayMs);
+
+    try{
+      setApiStatus("米10年金利取得中");
+      const ty = await fetchAlphaTreasury10Y();
+      setVal("us10y", ty.value.toFixed(3));
+      setCell("apiUs10y", `${ty.value.toFixed(3)}% / ${ty.date}`);
+    }catch(e){
+      errors.push("米10年金利: " + e.message);
+      setCell("apiUs10y", "取得失敗");
+    }
+
+    if(val("apiAutoFillEdv") === "yes" && edv && edv.price > 0){
+      if(!usdjpy) usdjpy = num("usdJpy");
+      const shares = num("edvShares");
+      if(shares > 0 && usdjpy > 0){
+        const edvValueYen = Math.round(edv.price * shares * usdjpy);
+        setVal("edvValueInput", edvValueYen);
+        updateAssetValueByName("EDV", edvValueYen);
+        setCell("apiEdvValue", yen(edvValueYen));
+      }
+    }
+
+    markApiUpdated();
+    saveAll();
+    analyzeEDV();
+    updateDashboard();
+
+    if(errors.length){
+      setApiStatus("一部取得失敗");
+      alert("一部取得に失敗した。成功した項目は反映済み。\n\n" + errors.join("\n\n") + "\n\n対処：Alpha取得間隔を10秒にして再実行、または明日再実行。");
+    }else{
+      setApiStatus("Alpha Vantage取得完了");
+      if(val("apiAutoRunAll") === "yes") runAll();
+    }
+  }catch(e){
+    setApiStatus("Alpha Vantage取得失敗");
+    alert("Alpha Vantage API取得に失敗した。手入力値を使う。\n" + e.message);
+  }
+}
+async function fetchStockFromAlpha(){
+  try{
+    const ticker = resolveTicker(val("stockTicker") || val("stockName"));
+    if(!ticker) throw new Error("米国株ティッカーが未入力");
+    setApiStatus(`${ticker} 取得中`);
+    const q = await fetchAlphaGlobalQuote(ticker);
+    setVal("stockApiPrice", q.price.toFixed(2));
+    setVal("stockApiChange", q.changePct);
+    setCell("apiStockPrice", `${ticker}: ${q.price.toFixed(2)} USD / ${q.changePct}`);
+    setCell("apiStockDate", q.date);
+    if(!val("stockName")) setVal("stockName", ticker);
+    markApiUpdated();
+    setApiStatus(`${ticker} 取得完了`);
+    saveAll();
+  }catch(e){
+    setApiStatus("個別株取得失敗");
+    alert("個別株API取得に失敗した。\n\n対処：NVIDIAではなくNVDA、MicrosoftではなくMSFTのようにティッカーで試す。\n日本株はAlpha Vantageで取得できない場合がある。\n\n詳細：" + e.message);
+  }
+}
+async function fetchAllMarketData(){
+  await fetchBTCFromCoinGecko();
+  await fetchAlphaCore();
+  const ticker = val("stockTicker").trim();
+  if(ticker) await fetchStockFromAlpha();
+  runAll();
+}
+if("serviceWorker" in navigator && location.protocol.startsWith("http")){
+  window.addEventListener("load", ()=>{
+    navigator.serviceWorker.register("./sw.js").catch(()=>{});
+  });
+}
+
+
+function addManualLog(){
+  const entry = {
+    datetime: val("logDate") || todayString(),
+    target: val("logTarget"),
+    decision: val("logDecision"),
+    amount: num("logAmount"),
+    reason: val("logReason")
+  };
+  logs.unshift(entry);
+  saveAll();
+  renderLogs();
+}
+function addLogFromResult(target){
+  let result = lastResults[target] || "";
+  if(!result){
+    if(target === "BTC") result = analyzeBTC().text;
+    if(target === "EDV") result = analyzeEDV().text;
+    if(target === "個別株") result = analyzeStock().text;
+  }
+  const decisionLine = (result.match(/判定：(.+)/) || result.match(/：(.+)/) || [,"要確認"])[1].trim();
+  logs.unshift({
+    datetime: nowString(),
+    target,
+    decision: decisionLine,
+    amount: target === "BTC" ? Number((result.match(/想定購入額：([\d,]+)円/)||[,"0"])[1].replaceAll(",","")) : 0,
+    reason: result
+  });
+  saveAll();
+  renderLogs();
+}
+function renderLogs(){
+  const tbody = document.querySelector("#logTable tbody");
+  tbody.innerHTML = "";
+  logs.forEach((l,i)=>{
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td class="mono">${escapeHtml(l.datetime||"")}</td>
+      <td>${escapeHtml(l.target||"")}</td>
+      <td>${escapeHtml(l.decision||"")}</td>
+      <td class="right">${yen(l.amount||0)}</td>
+      <td style="white-space:pre-wrap">${escapeHtml(l.reason||"")}</td>
+      <td><button class="danger" onclick="deleteLog(${i})">削除</button></td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+function deleteLog(i){
+  logs.splice(i,1);
+  saveAll();
+  renderLogs();
+}
+function clearLogs(){
+  if(!confirm("判断ログを全削除する？")) return;
+  logs = [];
+  saveAll();
+  renderLogs();
+}
+
+function csvEscape(v){
+  const s = String(v ?? "");
+  return `"${s.replaceAll('"','""')}"`;
+}
+function downloadText(filename, text, mime="text/plain;charset=utf-8"){
+  const blob = new Blob([text], {type:mime});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+function exportLogs(){
+  const header = ["日時","対象","判断","資金量","理由・条件・撤退条件"];
+  const rows = logs.map(l=>[l.datetime,l.target,l.decision,l.amount,l.reason]);
+  const csv = [header, ...rows].map(r=>r.map(csvEscape).join(",")).join("\n");
+  downloadText(`投資判断ログ_${todayString()}.csv`, csv, "text/csv;charset=utf-8");
+}
+function downloadSnapshot(){
+  saveAll();
+  const rows = [];
+  rows.push(["項目","値"]);
+  rows.push(["作成日時", nowString()]);
+  rows.push(["総資産", totalAssets()]);
+  rows.push(["BTC待機資金", btcCash()]);
+  rows.push(["EDV評価額", edvValue()]);
+  rows.push(["BTC価格USD", num("btcPrice")]);
+  rows.push(["BTC原則ラインUSD", num("setBtcWaitAbove")]);
+  rows.push(["BTC本命候補USD", num("setBtcMainUpper")]);
+  rows.push(["BTC強気候補USD", num("setBtcStrongUpper")]);
+  rows.push(["月足RSI", num("btcMonthlyRsi")]);
+  rows.push(["週足RSI", num("btcWeeklyRsi")]);
+  rows.push(["マクロ環境", macroLabel(val("macroState"))]);
+  const csv = rows.map(r=>r.map(csvEscape).join(",")).join("\n");
+  downloadText(`投資判断スナップショット_${todayString()}.csv`, csv, "text/csv;charset=utf-8");
+}
+function exportAllJson(){
+  saveAll();
+  const data = getData();
+  downloadText(`投資判断アプリ全データ_${todayString()}.json`, JSON.stringify(data,null,2), "application/json;charset=utf-8");
+}
+
+function loadDataFromStorage(){
+  const data = getData();
+  renderAssets(data.assets);
+  applyForm(data.form);
+  logs = data.logs || [];
+  renderLogs();
+}
+
+
+// ===== v12 overrides: light recommendation + chart interval =====
+function intervalLabelV12(v){
+  return {daily:"日足", weekly:"週足", monthly:"月足"}[v] || v;
+}
+
+function aggregateSeriesV12(series, interval){
+  if(interval === "daily") return series;
+  const buckets = new Map();
+  for(const x of series){
+    const d = new Date(x.date + "T00:00:00Z");
+    let key;
+    if(interval === "weekly"){
+      const day = d.getUTCDay();
+      const diff = day === 0 ? -6 : 1 - day;
+      const monday = new Date(d);
+      monday.setUTCDate(d.getUTCDate() + diff);
+      key = monday.toISOString().slice(0,10);
+    }else{
+      key = x.date.slice(0,7) + "-01";
+    }
+    const close = Number(x.close);
+    const high = Number(x.high ?? x.close);
+    const low = Number(x.low ?? x.close);
+    const open = Number(x.open ?? x.close);
+    if(!buckets.has(key)){
+      buckets.set(key, {date:key, open, high, low, close, volume:Number(x.volume || 0)});
+    }else{
+      const b = buckets.get(key);
+      b.high = Math.max(b.high, high);
+      b.low = Math.min(b.low, low);
+      b.close = close;
+      b.volume += Number(x.volume || 0);
+    }
+  }
+  return Array.from(buckets.values()).sort((a,b)=>a.date.localeCompare(b.date));
+}
+
+async function fetchAlphaSeriesByIntervalV12(symbol, interval){
+  const key = alphaKey();
+  let func = "TIME_SERIES_DAILY";
+  let dataKey = "Time Series (Daily)";
+  let output = "&outputsize=full";
+  if(interval === "weekly"){
+    func = "TIME_SERIES_WEEKLY";
+    dataKey = "Weekly Time Series";
+    output = "";
+  }else if(interval === "monthly"){
+    func = "TIME_SERIES_MONTHLY";
+    dataKey = "Monthly Time Series";
+    output = "";
+  }
+  const url = `https://www.alphavantage.co/query?function=${func}&symbol=${encodeURIComponent(symbol)}${output}&apikey=${encodeURIComponent(key)}`;
+  const data = await fetchJsonWithRetry(url, {}, `${symbol} ${interval}`);
+  const series = data[dataKey];
+  if(!series) throw new Error(`${symbol} の${intervalLabelV12(interval)}データが空`);
+  return Object.keys(series).sort().map(d => ({
+    date: d,
+    open: Number(series[d]["1. open"]),
+    high: Number(series[d]["2. high"]),
+    low: Number(series[d]["3. low"]),
+    close: Number(series[d]["4. close"]),
+    volume: Number(series[d]["5. volume"])
+  })).filter(x => isFinite(x.close));
+}
+
+// v12: 推奨候補判定は標準では株価APIを連続取得しない。
+// これで「判定中」停止と途中の株価取得失敗を避ける。
+function autoScreenRecommendations(){
+  try{
+    const listText = val("quickRecommendList");
+    const allNames = listText.split(/\n|,|、/).map(x=>x.trim()).filter(Boolean);
+    const maxCount = Math.max(1, Number(val("recommendMaxCount") || 20));
+    const names = allNames.slice(0, maxCount);
+    const threshold = Number(val("recommendThreshold") || 7);
+    const useApi = val("recommendUseApi") === "yes";
+    if(!names.length){
+      alert("対象リストが空。");
+      return;
+    }
+
+    setVal("recommendStatus", "判定中");
+
+    let baseScore = 0;
+    let baseReasons = [];
+    if(typeof autoStockScoreFromInputs === "function"){
+      const s = autoStockScoreFromInputs("quick");
+      baseScore = s.score;
+      baseReasons = s.reasons || [];
+    }else{
+      // fallback
+      if(num("quickEpsGrowth") >= 20) baseScore += 2;
+      if(num("quickSalesGrowth") >= 15) baseScore += 2;
+      if(num("quickRoe") >= 15) baseScore += 1;
+      if(val("quickBalanceQuality") === "good") baseScore += 1;
+      if(val("quickMoat") === "strong") baseScore += 2;
+      if(val("quickChartShape") === "breakout") baseScore += 2;
+      if(val("quickMarketTrend") === "good") baseScore += 2;
+    }
+
+    const rows = names.map(name => {
+      const ticker = resolveTicker(name);
+      let score = baseScore;
+      let label = "見送り";
+      if(score >= threshold + 3) label = "推奨候補A";
+      else if(score >= threshold) label = "推奨候補B";
+      else if(score >= 5) label = "監視継続";
+      return {name, ticker, score, label};
+    });
+
+    rows.sort((a,b)=>b.score-a.score || a.ticker.localeCompare(b.ticker));
+
+    const lines = rows.map((r,i)=>`${i+1}. ${r.name} / ${r.ticker}：${r.label}　スコア ${r.score}/12`);
+    const txt =
+`【結論】
+推奨候補スクリーニング完了
+
+【候補】
+${lines.join("\n")}
+
+【判定ルール】
+現在の一画面運用に入力されているEPS成長率、売上成長率、ROE、財務、競争優位性、チャート、市場地合いを全銘柄に適用して自動採点。
+株価APIの連続取得：${useApi ? "有効。ただしv12では停止防止のため一括連続取得は行わない" : "無効"}
+株価取得は上位候補だけ個別に行う。
+
+【次に確認】
+・上位候補だけ株価取得
+・日足、週足、月足チャート
+・出来高を伴う上抜けか
+・決算日
+・市場全体の地合い
+・損切り位置
+・資金量
+
+【注意】
+推奨候補は買い推奨ではない。
+条件一致度が高い調査候補という意味。`;
+
+    lastRecommendationText = txt;
+    const box = document.getElementById("recommendResult");
+    if(box) box.textContent = txt;
+    setVal("recommendStatus", "判定完了");
+    saveAll();
+  }catch(e){
+    setVal("recommendStatus", "判定失敗");
+    alert("推奨候補判定に失敗した。\n" + e.message);
+  }
+}
+
+// v12: 日足・週足・月足を切替
+async function quickFetchChartAndAnalyze(){
+  try{
+    const target = resolveChartSymbol();
+    const days = val("quickChartDays") || "365";
+    const interval = val("quickChartInterval") || "daily";
+    setInputOrText("quickChartStatus", "取得中");
+
+    let series;
+    if(target.kind === "crypto"){
+      const raw = await fetchBTCMarketChart(days);
+      const normalized = raw.map(x => ({
+        date: x.date,
+        open: x.close,
+        high: x.high ?? x.close,
+        low: x.low ?? x.close,
+        close: x.close,
+        volume: x.volume || 0
+      }));
+      series = aggregateSeriesV12(normalized, interval);
+    }else{
+      if(!target.symbol) throw new Error("ティッカーが未入力");
+      const raw = await fetchAlphaSeriesByIntervalV12(target.symbol, interval);
+      series = sliceDays(raw, Number(days));
+    }
+
+    if(!series.length) throw new Error("チャートデータが空");
+
+    lastChartSeries = series;
+    const closes = series.map(x=>x.close);
+    const ma50 = movingAverage(closes, 50);
+    const ma200 = movingAverage(closes, 200);
+    const label = `${target.label || target.symbol} ${intervalLabelV12(interval)}`;
+    drawChart(series, ma50, ma200, label);
+    const result = analyzeTechSeries(series, label, target.kind === "crypto");
+    document.getElementById("quickTechResult").textContent = result.text;
+    setInputOrText("quickChartStatus", "取得・分析完了");
+    saveAll();
+  }catch(e){
+    setInputOrText("quickChartStatus", "取得失敗");
+    alert("チャート取得・分析に失敗した。\n\n足種を変えて再実行するか、API制限なら時間を空ける。\n\n詳細：" + e.message);
+  }
+}
+
+
+// ===== v13: candidate auto replacement =====
+let lastCandidateReplacementText = "";
+
+function candidateStoreKey(){
+  return STORAGE_KEY + "_candidateScores";
+}
+function getCandidateScores(){
+  try{
+    return JSON.parse(localStorage.getItem(candidateStoreKey()) || "{}");
+  }catch(e){
+    return {};
+  }
+}
+function saveCandidateScores(scores){
+  localStorage.setItem(candidateStoreKey(), JSON.stringify(scores || {}));
+}
+function normalizeTickerName(name){
+  return resolveTicker(String(name || "").trim());
+}
+function setCandidateScore(ticker, patch){
+  const key = normalizeTickerName(ticker);
+  if(!key) return;
+  const scores = getCandidateScores();
+  scores[key] = Object.assign({ticker:key, updated:nowString()}, scores[key] || {}, patch || {}, {updated:nowString()});
+  saveCandidateScores(scores);
+}
+function getCandidateScoreRecord(ticker){
+  const key = normalizeTickerName(ticker);
+  const scores = getCandidateScores();
+  return scores[key] || null;
+}
+function calcTechnicalScoreFromSeries(series){
+  if(!series || series.length < 60) return {technicalScore:0, technicalLabel:"データ不足", detail:"チャートデータ不足"};
+  const closes = series.map(x=>x.close);
+  const ma50 = movingAverage(closes, 50);
+  const ma200 = movingAverage(closes, 200);
+  const last = closes[closes.length - 1];
+  const lastMa50 = ma50[ma50.length - 1];
+  const lastMa200 = ma200[ma200.length - 1];
+  const r = rsi(closes, 14);
+  let score = 0;
+  const reasons = [];
+
+  if(lastMa50 && last > lastMa50){ score += 2; reasons.push("価格>MA50"); }
+  else reasons.push("価格<=MA50");
+
+  if(lastMa200 && last > lastMa200){ score += 2; reasons.push("価格>MA200"); }
+  else reasons.push("価格<=MA200");
+
+  if(lastMa50 && lastMa200 && lastMa50 > lastMa200){ score += 2; reasons.push("MA50>MA200"); }
+  else reasons.push("MA50<=MA200");
+
+  if(r != null && r >= 45 && r <= 70){ score += 2; reasons.push("RSI適正"); }
+  else if(r != null && r > 70){ score -= 1; reasons.push("RSI過熱"); }
+  else if(r != null && r < 35){ score += 1; reasons.push("RSI売られ過ぎ"); }
+  else reasons.push("RSI中立");
+
+  const high = Math.max(...closes);
+  const dd = high > 0 ? (high - last) / high * 100 : 0;
+  if(dd <= 15){ score += 1; reasons.push("高値圏維持"); }
+  else if(dd <= 35){ reasons.push("調整中"); }
+  else { score -= 1; reasons.push("深い調整"); }
+
+  let label = "弱い";
+  if(score >= 7) label = "強い";
+  else if(score >= 5) label = "中立上";
+  else if(score >= 3) label = "中立";
+
+  return {
+    technicalScore: Math.max(0, score),
+    technicalLabel: label,
+    lastPrice: last,
+    rsi14: r,
+    ma50: lastMa50,
+    ma200: lastMa200,
+    drawdown: dd,
+    detail: reasons.join(" / ")
+  };
+}
+function currentFundamentalScore(){
+  let score = 0;
+  if(num("quickEpsGrowth") >= 20) score += 2;
+  if(num("quickSalesGrowth") >= 15) score += 2;
+  if(num("quickRoe") >= 15) score += 1;
+  if(val("quickBalanceQuality") === "good") score += 1;
+  if(val("quickMoat") === "strong") score += 2;
+  if(val("quickMarketTrend") === "good") score += 1;
+  return score;
+}
+function parseCandidateList(text){
+  return String(text || "").split(/\n|,|、/).map(x=>x.trim()).filter(Boolean);
+}
+function autoReplaceRecommendationList(){
+  const pool = parseCandidateList(val("candidatePoolList"));
+  const slotCount = Math.max(1, Number(val("candidateSlotCount") || 10));
+  const minScore = Number(val("candidateMinScore") || 6);
+  const scores = getCandidateScores();
+
+  if(!pool.length){
+    alert("候補プールが空。");
+    return;
+  }
+
+  const rows = pool.map(name=>{
+    const ticker = normalizeTickerName(name);
+    const rec = scores[ticker] || {};
+    const hasAnalysis = !!rec.updated;
+    const tech = Number(rec.technicalScore || 0);
+    const fundamental = Number(rec.fundamentalScore || 0);
+    const manual = Number(rec.manualScore || 0);
+    const total = (hasAnalysis ? tech : 0) + fundamental + manual;
+    let label = "未分析";
+    if(hasAnalysis){
+      if(total >= 10) label = "推奨候補A";
+      else if(total >= minScore) label = "推奨候補B";
+      else if(total >= 4) label = "監視継続";
+      else label = "除外候補";
+    }
+    return {name, ticker, total, label, hasAnalysis, rec};
+  });
+
+  const selected = rows
+    .filter(r => r.hasAnalysis && r.total >= minScore)
+    .sort((a,b)=>b.total-a.total || a.ticker.localeCompare(b.ticker))
+    .slice(0, slotCount);
+
+  const unselected = rows
+    .filter(r => !selected.some(s=>s.ticker===r.ticker))
+    .sort((a,b)=>b.total-a.total || a.ticker.localeCompare(b.ticker));
+
+  const newList = selected.length ? selected.map(r=>r.ticker).join("\n") : val("quickRecommendList");
+  if(selected.length) setVal("quickRecommendList", newList);
+
+  const selectedLines = selected.length
+    ? selected.map((r,i)=>`${i+1}. ${r.name} / ${r.ticker}：${r.label}　総合${r.total}　技術${r.rec.technicalScore ?? "-"}　更新${r.rec.updated || "-"}`).join("\n")
+    : "条件を満たす分析済み候補なし";
+
+  const pendingLines = unselected.slice(0, 20).map((r,i)=>`${i+1}. ${r.name} / ${r.ticker}：${r.label}　総合${r.total}　${r.hasAnalysis ? "分析済み" : "未分析"}`).join("\n");
+
+  const txt =
+`【結論】
+推奨候補リストの自動入替を実行。
+
+【採用候補】
+${selectedLines}
+
+【未採用・次に確認】
+${pendingLines || "なし"}
+
+【ルール】
+候補プールから、分析済みスコアが最低スコア以上の銘柄だけを推奨候補リストへ採用。
+未分析銘柄は自動採用しない。
+上位候補を個別にチャート分析すると、次回の自動入替に反映される。
+
+【注意】
+推奨候補は買い推奨ではない。
+買う前に決算、出来高、週足/月足、市場地合い、損切り位置を確認する。`;
+
+  lastCandidateReplacementText = txt;
+  const box = document.getElementById("candidateReplaceResult");
+  if(box) box.textContent = txt;
+  saveAll();
+}
+function addCandidateReplacementLog(){
+  if(!lastCandidateReplacementText){
+    alert("先に推奨候補を自動入替する。");
+    return;
+  }
+  logs.unshift({
+    datetime: nowString(),
+    target: "推奨候補入替",
+    decision: "自動入替",
+    amount: 0,
+    reason: lastCandidateReplacementText
+  });
+  saveAll();
+  renderLogs();
+}
+function resetCandidateScores(){
+  if(!confirm("分析スコアをリセットする？")) return;
+  localStorage.removeItem(candidateStoreKey());
+  const box = document.getElementById("candidateReplaceResult");
+  if(box) box.textContent = "分析スコアをリセットした。";
+}
+
+// Override quickAnalyzeStock: individual score is stored for candidate replacement.
+function quickAnalyzeStock(){
+  const input = val("quickStockInput");
+  const ticker = resolveTicker(input);
+  setVal("quickResolvedTicker", ticker);
+  setVal("stockName", input || ticker);
+  setVal("stockTicker", ticker);
+  setVal("epsGrowth", num("quickEpsGrowth"));
+  setVal("salesGrowth", num("quickSalesGrowth"));
+  setVal("roe", num("quickRoe"));
+  setVal("balanceQuality", val("quickBalanceQuality"));
+  setVal("moat", val("quickMoat"));
+  setVal("chartShape", val("quickChartShape"));
+  setVal("marketTrend", val("quickMarketTrend"));
+  setVal("stockMemo", val("quickStockMemo"));
+
+  let score = 0;
+  const reasons = [];
+  function add(cond, pts, ok, ng){
+    if(cond){ score += pts; reasons.push("○ " + ok); }
+    else reasons.push("× " + ng);
+  }
+  add(num("quickEpsGrowth") >= 20, 2, "EPS成長率20%以上", "EPS成長が20%未満");
+  add(num("quickSalesGrowth") >= 15, 2, "売上成長率15%以上", "売上成長が15%未満");
+  add(num("quickRoe") >= 15, 1, "ROE15%以上", "ROEが15%未満");
+  add(val("quickBalanceQuality") === "good", 1, "財務健全性が強い", "財務健全性は強いとは言えない");
+  add(val("quickMoat") === "strong", 2, "競争優位性が強い", "競争優位性が明確ではない");
+  add(val("quickChartShape") === "breakout", 2, "高出来高ブレイクアウト", "ブレイクアウト条件は未達");
+  add(val("quickMarketTrend") === "good", 2, "市場地合いが良い", "市場地合いが十分ではない");
+
+  let label = "見送り";
+  if(score >= 10) label = "推奨候補A";
+  else if(score >= 7) label = "推奨候補B";
+  else if(score >= 5) label = "監視継続";
+
+  setCandidateScore(ticker, {
+    fundamentalScore: score,
+    fundamentalLabel: label,
+    fundamentalDetail: reasons.join(" / ")
+  });
+
+  const txt =
+`【結論】
+${input || ticker}：${label}
+条件一致スコア：${score}/12
+
+【自動判定】
+${reasons.join("\n")}
+
+【判断】
+この表示は買い推奨ではなく、条件一致度が高い推奨候補の抽出。
+推奨候補Aでも、決算日、出来高、地合い、損切り位置、資金量を確認するまでは買わない。
+
+【注意点】
+この判定は推奨候補入替のスコアにも保存される。`;
+
+  const box = document.getElementById("quickStockResult");
+  if(box) box.textContent = txt;
+  lastResults["個別株"] = txt;
+  saveAll();
+  return txt;
+}
+
+// Override chart analysis to store technical score for candidate replacement.
+async function quickFetchChartAndAnalyze(){
+  try{
+    const target = resolveChartSymbol();
+    const days = val("quickChartDays") || "365";
+    const interval = val("quickChartInterval") || "daily";
+    setInputOrText("quickChartStatus", "取得中");
+
+    let series;
+    if(target.kind === "crypto"){
+      const raw = await fetchBTCMarketChart(days);
+      const normalized = raw.map(x => ({date:x.date, open:x.close, high:x.high ?? x.close, low:x.low ?? x.close, close:x.close, volume:x.volume || 0}));
+      series = typeof aggregateSeriesV12 === "function" ? aggregateSeriesV12(normalized, interval) : aggregateSeriesV13(normalized, interval);
+    }else{
+      if(!target.symbol) throw new Error("ティッカーが未入力");
+      if(typeof fetchAlphaSeriesByIntervalV12 === "function"){
+        const raw = await fetchAlphaSeriesByIntervalV12(target.symbol, interval);
+        series = sliceDays(raw, Number(days));
+      }else{
+        const raw = await fetchAlphaDailySeries(target.symbol, Number(days) > 120 ? "full" : "compact");
+        series = sliceDays(raw, Number(days));
+      }
+    }
+
+    if(!series.length) throw new Error("チャートデータが空");
+
+    lastChartSeries = series;
+    const closes = series.map(x=>x.close);
+    const ma50 = movingAverage(closes, 50);
+    const ma200 = movingAverage(closes, 200);
+    const label = `${target.label || target.symbol} ${interval}`;
+    drawChart(series, ma50, ma200, label);
+    const result = analyzeTechSeries(series, label, target.kind === "crypto");
+    document.getElementById("quickTechResult").textContent = result.text;
+
+    if(target.kind !== "crypto" && target.symbol){
+      const tech = calcTechnicalScoreFromSeries(series);
+      setCandidateScore(target.symbol, tech);
+    }
+
+    setInputOrText("quickChartStatus", "取得・分析完了");
+    saveAll();
+  }catch(e){
+    setInputOrText("quickChartStatus", "取得失敗");
+    alert("チャート取得・分析に失敗した。\n\n足種を変えて再実行するか、API制限なら時間を空ける。\n\n詳細：" + e.message);
+  }
+}
+function aggregateSeriesV13(series, interval){
+  if(interval === "daily") return series;
+  const buckets = new Map();
+  for(const x of series){
+    const d = new Date(x.date + "T00:00:00Z");
+    let key = x.date;
+    if(interval === "weekly"){
+      const day = d.getUTCDay();
+      const diff = day === 0 ? -6 : 1 - day;
+      const monday = new Date(d);
+      monday.setUTCDate(d.getUTCDate() + diff);
+      key = monday.toISOString().slice(0,10);
+    }else if(interval === "monthly"){
+      key = x.date.slice(0,7) + "-01";
+    }
+    if(!buckets.has(key)){
+      buckets.set(key, {date:key, open:x.open ?? x.close, high:x.high ?? x.close, low:x.low ?? x.close, close:x.close, volume:x.volume || 0});
+    }else{
+      const b = buckets.get(key);
+      b.high = Math.max(b.high, x.high ?? x.close);
+      b.low = Math.min(b.low, x.low ?? x.close);
+      b.close = x.close;
+      b.volume += x.volume || 0;
+    }
+  }
+  return Array.from(buckets.values()).sort((a,b)=>a.date.localeCompare(b.date));
+}
+
+
+// ===== v14: chart fix + sanitized API errors =====
+function sanitizeApiErrorMessage(msg){
+  let s = String(msg || "");
+  const key = val("alphaKey");
+  if(key) s = s.replaceAll(key, "********");
+  const qKey = val("quickAlphaKey");
+  if(qKey) s = s.replaceAll(qKey, "********");
+  s = s.replace(/apikey=[A-Z0-9]+/gi, "apikey=********");
+  return s;
+}
+
+async function fetchJson(url, options={}){
+  const res = await fetch(url, options);
+  if(!res.ok) throw new Error(`HTTP ${res.status}`);
+  const data = await res.json();
+  const msg = data.Note || data.Information || data["Error Message"];
+  if(msg) {
+    const err = new Error(sanitizeApiErrorMessage(msg));
+    err.apiMessage = sanitizeApiErrorMessage(msg);
+    throw err;
+  }
+  return data;
+}
+
+async function fetchJsonWithRetry(url, options={}, label="API"){
+  try{
+    return await fetchJson(url, options);
+  }catch(e){
+    if(typeof isRateLimitMessage === "function" && isRateLimitMessage(e.message)){
+      setApiStatus(`${label} 制限回避待機中`);
+      const waitMs = Math.max(5000, Number(val("alphaDelaySec") || 3) * 1000 * 2);
+      if(typeof sleep === "function") await sleep(waitMs);
+      return await fetchJson(url, options);
+    }
+    throw e;
+  }
+}
+
+function techPeriodsForInterval(interval){
+  if(interval === "monthly") return {short:12, long:24, shortName:"12ヶ月線", longName:"24ヶ月線", min:12};
+  if(interval === "weekly") return {short:10, long:40, shortName:"10週線", longName:"40週線", min:20};
+  return {short:50, long:200, shortName:"MA50", longName:"MA200", min:60};
+}
+
+function intervalLabelV14(v){
+  return {daily:"日足", weekly:"週足", monthly:"月足"}[v] || v;
+}
+
+function aggregateSeriesV14(series, interval){
+  if(interval === "daily") return series;
+  const buckets = new Map();
+  for(const x of series){
+    const d = new Date(x.date + "T00:00:00Z");
+    let key;
+    if(interval === "weekly"){
+      const day = d.getUTCDay();
+      const diff = day === 0 ? -6 : 1 - day;
+      const monday = new Date(d);
+      monday.setUTCDate(d.getUTCDate() + diff);
+      key = monday.toISOString().slice(0,10);
+    }else{
+      key = x.date.slice(0,7) + "-01";
+    }
+    const close = Number(x.close);
+    const high = Number(x.high ?? x.close);
+    const low = Number(x.low ?? x.close);
+    const open = Number(x.open ?? x.close);
+    if(!buckets.has(key)){
+      buckets.set(key, {date:key, open, high, low, close, volume:Number(x.volume || 0)});
+    }else{
+      const b = buckets.get(key);
+      b.high = Math.max(b.high, high);
+      b.low = Math.min(b.low, low);
+      b.close = close;
+      b.volume += Number(x.volume || 0);
+    }
+  }
+  return Array.from(buckets.values()).sort((a,b)=>a.date.localeCompare(b.date));
+}
+
+async function fetchAlphaSeriesByIntervalV14(symbol, interval){
+  const key = alphaKey();
+  let func = "TIME_SERIES_DAILY";
+  let dataKey = "Time Series (Daily)";
+  let output = "&outputsize=full";
+  if(interval === "weekly"){
+    func = "TIME_SERIES_WEEKLY";
+    dataKey = "Weekly Time Series";
+    output = "";
+  }else if(interval === "monthly"){
+    func = "TIME_SERIES_MONTHLY";
+    dataKey = "Monthly Time Series";
+    output = "";
+  }
+  const url = `https://www.alphavantage.co/query?function=${func}&symbol=${encodeURIComponent(symbol)}${output}&apikey=${encodeURIComponent(key)}`;
+  const data = await fetchJsonWithRetry(url, {}, `${symbol} ${intervalLabelV14(interval)}`);
+  const series = data[dataKey];
+  if(!series) throw new Error(`${symbol} の${intervalLabelV14(interval)}データが空`);
+  return Object.keys(series).sort().map(d => ({
+    date: d,
+    open: Number(series[d]["1. open"]),
+    high: Number(series[d]["2. high"]),
+    low: Number(series[d]["3. low"]),
+    close: Number(series[d]["4. close"]),
+    volume: Number(series[d]["5. volume"])
+  })).filter(x => isFinite(x.close));
+}
+
+function analyzeTechSeriesAdaptive(series, label, isBTC=false, interval="daily"){
+  const p = techPeriodsForInterval(interval);
+  if(!series || series.length < p.min) {
+    throw new Error(`${intervalLabelV14(interval)}の分析に必要なデータ数が不足。必要目安${p.min}本、現在${series ? series.length : 0}本。期間を長くするか、日足に変える。`);
+  }
+
+  const closes = series.map(x=>x.close);
+  const shortMa = movingAverage(closes, p.short);
+  const longMa = movingAverage(closes, p.long);
+  const last = closes[closes.length-1];
+  const lastShort = shortMa[shortMa.length-1];
+  const lastLong = longMa[longMa.length-1];
+  const r = rsi(closes, 14);
+  const lookback = series.slice(Math.max(0, series.length - Math.min(90, series.length)));
+  const support = Math.min(...lookback.map(x=>x.low || x.close));
+  const resistance = Math.max(...lookback.map(x=>x.high || x.close));
+  const periodHigh = Math.max(...closes);
+  const dd = periodHigh > 0 ? (periodHigh - last) / periodHigh * 100 : 0;
+
+  let trend = "中立";
+  if(lastShort && lastLong && last > lastShort && lastShort > lastLong) trend = "上昇基調";
+  else if(lastShort && lastLong && last < lastShort && lastShort < lastLong) trend = "下落基調";
+  else if(lastShort && last > lastShort) trend = "短期は強いが判定は中立";
+  else if(lastShort && last < lastShort) trend = "短期は弱い";
+
+  let heat = "中立";
+  if(r != null && r >= 70) heat = "過熱";
+  else if(r != null && r <= 30) heat = "売られ過ぎ";
+  else if(r != null && r <= 45) heat = "過熱感は弱い";
+
+  let decision = "監視";
+  let comment = "";
+  if(isBTC){
+    if(last > num("setBtcWaitAbove")){
+      decision = "BTCは原則見送り";
+      comment = "価格条件が未達。上昇基調でも高値追いは避ける。";
+    }else if(r != null && r < 55){
+      decision = "BTCは再判定候補";
+      comment = "価格条件に入り、過熱感も限定的なら分割購入条件を確認する。";
+    }else{
+      decision = "BTCは条件付き監視";
+      comment = "価格条件だけでなく、RSI、出来高、マクロ、資金余力を確認する。";
+    }
+  }else{
+    if(trend === "上昇基調" && heat !== "過熱") {
+      decision = "推奨候補";
+      comment = "トレンドは悪くない。ただし業績、出来高、ベース形成、地合い確認が必要。";
+    }else if(heat === "過熱"){
+      decision = "高値追い注意";
+      comment = "過熱感がある。ブレイクアウト後のだましや押し目を警戒。";
+    }else if(trend === "下落基調"){
+      decision = "見送り優勢";
+      comment = "移動平均線の並びが弱い。CAN SLIM的には買いにくい。";
+    }else{
+      decision = "監視継続";
+      comment = "チャート単体では強い優位性は断定できない。";
+    }
+  }
+
+  setInputOrText("techLastPrice", fmtPrice(last));
+  setInputOrText("techMa50", fmtPrice(lastShort));
+  setInputOrText("techMa200", fmtPrice(lastLong));
+  setInputOrText("techRsi", r == null ? "-" : r.toFixed(1));
+
+  const txt =
+`【結論】
+${label}：${decision}
+
+【テクニカル】
+足種：${intervalLabelV14(interval)}
+終値：${fmtPrice(last)}
+${p.shortName}：${fmtPrice(lastShort)}
+${p.longName}：${fmtPrice(lastLong)}
+RSI14：${r == null ? "-" : r.toFixed(1)}
+支持線目安：${fmtPrice(support)}
+抵抗線目安：${fmtPrice(resistance)}
+期間高値からの下落率：${dd.toFixed(1)}%
+トレンド：${trend}
+過熱感：${heat}
+
+【判断】
+${comment}
+
+【注意点】
+これはチャート条件の整理であり、売買指示ではない。
+個別株は業績成長、出来高、地合い、決算日、損切り位置を別途確認する。`;
+
+  lastChartAnalysisText = txt;
+  return {text:txt, shortMa, longMa, last, r, trend, heat, support, resistance, dd};
+}
+
+function drawChartV14(series, shortMa, longMa, label, shortName, longName){
+  const canvas = document.getElementById("quickChartCanvas");
+  if(!canvas || !series.length) return;
+  const rect = canvas.getBoundingClientRect();
+  const dpr = window.devicePixelRatio || 1;
+  canvas.width = Math.max(600, Math.floor(rect.width * dpr));
+  canvas.height = Math.floor(360 * dpr);
+  const ctx = canvas.getContext("2d");
+  const W = canvas.width, H = canvas.height;
+  const padL = 60*dpr, padR = 20*dpr, padT = 24*dpr, padB = 34*dpr;
+  ctx.clearRect(0,0,W,H);
+  ctx.fillStyle = "#ffffff";
+  ctx.fillRect(0,0,W,H);
+
+  const vals = [];
+  series.forEach(x=>vals.push(x.close));
+  shortMa.forEach(x=>{ if(x!=null) vals.push(x); });
+  longMa.forEach(x=>{ if(x!=null) vals.push(x); });
+  let min = Math.min(...vals), max = Math.max(...vals);
+  const margin = (max-min)*0.08 || max*0.05 || 1;
+  min -= margin; max += margin;
+  const xOf = i => padL + (i/(series.length-1 || 1))*(W-padL-padR);
+  const yOf = v => padT + (max-v)/(max-min)*(H-padT-padB);
+
+  ctx.strokeStyle = "#e5e7eb";
+  ctx.lineWidth = 1*dpr;
+  ctx.font = `${11*dpr}px sans-serif`;
+  ctx.fillStyle = "#6b7280";
+  for(let g=0; g<=4; g++){
+    const y = padT + g*(H-padT-padB)/4;
+    ctx.beginPath(); ctx.moveTo(padL, y); ctx.lineTo(W-padR, y); ctx.stroke();
+    const val = max - g*(max-min)/4;
+    ctx.fillText(val.toFixed(2), 6*dpr, y+4*dpr);
+  }
+
+  function line(data, color, width=2){
+    ctx.strokeStyle = color;
+    ctx.lineWidth = width*dpr;
+    ctx.beginPath();
+    let started = false;
+    data.forEach((v,i)=>{
+      if(v == null || !isFinite(v)) return;
+      const x = xOf(i), y = yOf(v);
+      if(!started){ ctx.moveTo(x,y); started = true; }
+      else ctx.lineTo(x,y);
+    });
+    ctx.stroke();
+  }
+  line(series.map(x=>x.close), "#111827", 2.2);
+  line(shortMa, "#2563eb", 1.4);
+  line(longMa, "#dc2626", 1.4);
+
+  ctx.fillStyle = "#111827";
+  ctx.font = `${13*dpr}px sans-serif`;
+  ctx.fillText(label, padL, 16*dpr);
+  ctx.fillStyle = "#111827"; ctx.fillText("価格", W-250*dpr, 18*dpr);
+  ctx.fillStyle = "#2563eb"; ctx.fillText(shortName, W-190*dpr, 18*dpr);
+  ctx.fillStyle = "#dc2626"; ctx.fillText(longName, W-105*dpr, 18*dpr);
+
+  const first = series[0]?.date || "";
+  const last = series[series.length-1]?.date || "";
+  ctx.fillStyle = "#6b7280";
+  ctx.font = `${11*dpr}px sans-serif`;
+  ctx.fillText(first, padL, H-10*dpr);
+  ctx.fillText(last, W-105*dpr, H-10*dpr);
+}
+
+async function quickFetchChartAndAnalyze(){
+  try{
+    const target = resolveChartSymbol();
+    const days = val("quickChartDays") || "365";
+    const interval = val("quickChartInterval") || "daily";
+    const p = techPeriodsForInterval(interval);
+    setInputOrText("quickChartStatus", "取得中");
+
+    let series;
+    if(target.kind === "crypto"){
+      const raw = await fetchBTCMarketChart(days);
+      const normalized = raw.map(x => ({date:x.date, open:x.close, high:x.high ?? x.close, low:x.low ?? x.close, close:x.close, volume:x.volume || 0}));
+      series = aggregateSeriesV14(normalized, interval);
+    }else{
+      if(!target.symbol) throw new Error("ティッカーが未入力");
+      const raw = await fetchAlphaSeriesByIntervalV14(target.symbol, interval);
+      series = sliceDays(raw, Number(days));
+    }
+
+    if(!series.length) throw new Error("チャートデータが空");
+
+    lastChartSeries = series;
+    const closes = series.map(x=>x.close);
+    const shortMa = movingAverage(closes, p.short);
+    const longMa = movingAverage(closes, p.long);
+    const label = `${target.label || target.symbol} ${intervalLabelV14(interval)} price / ${p.shortName} / ${p.longName}`;
+    drawChartV14(series, shortMa, longMa, label, p.shortName, p.longName);
+    const result = analyzeTechSeriesAdaptive(series, `${target.label || target.symbol} ${intervalLabelV14(interval)}`, target.kind === "crypto", interval);
+    document.getElementById("quickTechResult").textContent = result.text;
+
+    if(target.kind !== "crypto" && target.symbol && typeof calcTechnicalScoreFromSeries === "function"){
+      const tech = calcTechnicalScoreFromSeries(series);
+      if(typeof setCandidateScore === "function") setCandidateScore(target.symbol, tech);
+    }
+
+    setInputOrText("quickChartStatus", "取得・分析完了");
+    saveAll();
+  }catch(e){
+    setInputOrText("quickChartStatus", "取得失敗");
+    alert("チャート取得・分析に失敗した。\n\n足種を日足にする、期間を長くする、またはAPI制限なら時間を空ける。\n\n詳細：" + sanitizeApiErrorMessage(e.message));
+  }
+}
+
+
+// ===== v15: candlestick chart + API counter =====
+function todayKeyV15(){
+  const d = new Date();
+  const pad = n => String(n).padStart(2,"0");
+  return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+}
+function alphaCounterKey(){
+  return STORAGE_KEY + "_alphaCounter";
+}
+function getAlphaCounter(){
+  try{
+    const obj = JSON.parse(localStorage.getItem(alphaCounterKey()) || "{}");
+    if(obj.date !== todayKeyV15()) return {date:todayKeyV15(), count:0};
+    return {date:obj.date, count:Number(obj.count || 0)};
+  }catch(e){
+    return {date:todayKeyV15(), count:0};
+  }
+}
+function saveAlphaCounter(count){
+  localStorage.setItem(alphaCounterKey(), JSON.stringify({date:todayKeyV15(), count:Number(count || 0)}));
+  updateAlphaCounterDisplay();
+}
+function incrementAlphaCounter(){
+  const c = getAlphaCounter();
+  c.count += 1;
+  saveAlphaCounter(c.count);
+}
+function resetAlphaCounter(){
+  if(!confirm("Alpha Vantageの使用回数目安をリセットする？ 実際のAPI側上限はリセットされない。")) return;
+  saveAlphaCounter(0);
+}
+function updateAlphaCounterDisplay(){
+  const c = getAlphaCounter();
+  const remain = Math.max(0, 25 - c.count);
+  setInputOrText("alphaDailyCount", `${c.count} / 25`);
+  setInputOrText("alphaRemainingCount", String(remain));
+}
+function isAlphaUrl(url){
+  return String(url || "").includes("alphavantage.co");
+}
+function assertAlphaLimit(url){
+  if(isAlphaUrl(url)){
+    const c = getAlphaCounter();
+    if(c.count >= 25){
+      throw new Error("Alpha Vantageの無料枠25回/日の目安に到達。今日はAlpha Vantage取得を停止。BTC取得、手入力、ログ保存は使用可能。");
+    }
+  }
+}
+
+async function fetchJson(url, options={}){
+  assertAlphaLimit(url);
+  if(isAlphaUrl(url)) incrementAlphaCounter();
+  const res = await fetch(url, options);
+  if(!res.ok) throw new Error(`HTTP ${res.status}`);
+  const data = await res.json();
+  const msg = data.Note || data.Information || data["Error Message"];
+  if(msg) {
+    const err = new Error(sanitizeApiErrorMessage(msg));
+    err.apiMessage = sanitizeApiErrorMessage(msg);
+    throw err;
+  }
+  return data;
+}
+
+function drawChartV15(series, shortMa, longMa, label, shortName, longName, chartType){
+  const canvas = document.getElementById("quickChartCanvas");
+  if(!canvas || !series.length) return;
+  const rect = canvas.getBoundingClientRect();
+  const dpr = window.devicePixelRatio || 1;
+  canvas.width = Math.max(600, Math.floor(rect.width * dpr));
+  canvas.height = Math.floor(360 * dpr);
+  const ctx = canvas.getContext("2d");
+  const W = canvas.width, H = canvas.height;
+  const padL = 60*dpr, padR = 20*dpr, padT = 24*dpr, padB = 34*dpr;
+  ctx.clearRect(0,0,W,H);
+  ctx.fillStyle = "#ffffff";
+  ctx.fillRect(0,0,W,H);
+
+  const vals = [];
+  series.forEach(x=>{
+    vals.push(Number(x.close));
+    if(isFinite(x.high)) vals.push(Number(x.high));
+    if(isFinite(x.low)) vals.push(Number(x.low));
+  });
+  shortMa.forEach(x=>{ if(x!=null) vals.push(x); });
+  longMa.forEach(x=>{ if(x!=null) vals.push(x); });
+  let min = Math.min(...vals), max = Math.max(...vals);
+  const margin = (max-min)*0.08 || max*0.05 || 1;
+  min -= margin; max += margin;
+  const xOf = i => padL + (i/(series.length-1 || 1))*(W-padL-padR);
+  const yOf = v => padT + (max-v)/(max-min)*(H-padT-padB);
+
+  // grid
+  ctx.strokeStyle = "#e5e7eb";
+  ctx.lineWidth = 1*dpr;
+  ctx.font = `${11*dpr}px sans-serif`;
+  ctx.fillStyle = "#6b7280";
+  for(let g=0; g<=4; g++){
+    const y = padT + g*(H-padT-padB)/4;
+    ctx.beginPath(); ctx.moveTo(padL, y); ctx.lineTo(W-padR, y); ctx.stroke();
+    const val = max - g*(max-min)/4;
+    ctx.fillText(val.toFixed(2), 6*dpr, y+4*dpr);
+  }
+
+  function line(data, color, width=2){
+    ctx.strokeStyle = color;
+    ctx.lineWidth = width*dpr;
+    ctx.beginPath();
+    let started = false;
+    data.forEach((v,i)=>{
+      if(v == null || !isFinite(v)) return;
+      const x = xOf(i), y = yOf(v);
+      if(!started){ ctx.moveTo(x,y); started = true; }
+      else ctx.lineTo(x,y);
+    });
+    ctx.stroke();
+  }
+
+  if(chartType === "candlestick"){
+    const usable = series.length;
+    const spacing = (W-padL-padR)/(usable || 1);
+    const bodyW = Math.max(2*dpr, Math.min(9*dpr, spacing*0.55));
+    series.forEach((s,i)=>{
+      const x = xOf(i);
+      const o = Number(s.open ?? s.close);
+      const c = Number(s.close);
+      const h = Number(s.high ?? Math.max(o,c));
+      const l = Number(s.low ?? Math.min(o,c));
+      const up = c >= o;
+      ctx.strokeStyle = up ? "#166534" : "#b91c1c";
+      ctx.fillStyle = up ? "#dcfce7" : "#fee2e2";
+      ctx.lineWidth = 1*dpr;
+      ctx.beginPath();
+      ctx.moveTo(x, yOf(h));
+      ctx.lineTo(x, yOf(l));
+      ctx.stroke();
+      const y1 = yOf(Math.max(o,c));
+      const y2 = yOf(Math.min(o,c));
+      const bh = Math.max(1.5*dpr, y2-y1);
+      ctx.fillRect(x-bodyW/2, y1, bodyW, bh);
+      ctx.strokeRect(x-bodyW/2, y1, bodyW, bh);
+    });
+  }else{
+    line(series.map(x=>x.close), "#111827", 2.2);
+  }
+
+  line(shortMa, "#2563eb", 1.4);
+  line(longMa, "#dc2626", 1.4);
+
+  ctx.fillStyle = "#111827";
+  ctx.font = `${13*dpr}px sans-serif`;
+  ctx.fillText(label, padL, 16*dpr);
+  ctx.fillStyle = "#111827"; ctx.fillText(chartType === "candlestick" ? "ローソク" : "価格", W-270*dpr, 18*dpr);
+  ctx.fillStyle = "#2563eb"; ctx.fillText(shortName, W-190*dpr, 18*dpr);
+  ctx.fillStyle = "#dc2626"; ctx.fillText(longName, W-105*dpr, 18*dpr);
+
+  const first = series[0]?.date || "";
+  const last = series[series.length-1]?.date || "";
+  ctx.fillStyle = "#6b7280";
+  ctx.font = `${11*dpr}px sans-serif`;
+  ctx.fillText(first, padL, H-10*dpr);
+  ctx.fillText(last, W-105*dpr, H-10*dpr);
+}
+
+async function quickFetchChartAndAnalyze(){
+  try{
+    updateAlphaCounterDisplay();
+    const target = resolveChartSymbol();
+    const days = val("quickChartDays") || "365";
+    const interval = val("quickChartInterval") || "daily";
+    const chartType = val("quickChartType") || "candlestick";
+    const p = techPeriodsForInterval(interval);
+    setInputOrText("quickChartStatus", "取得中");
+
+    let series;
+    if(target.kind === "crypto"){
+      const raw = await fetchBTCMarketChart(days);
+      const normalized = raw.map((x, i, arr) => {
+        const prev = i > 0 ? arr[i-1].close : x.close;
+        return {
+          date:x.date,
+          open:prev,
+          high:Math.max(prev, x.close),
+          low:Math.min(prev, x.close),
+          close:x.close,
+          volume:x.volume || 0
+        };
+      });
+      series = aggregateSeriesV14(normalized, interval);
+    }else{
+      if(!target.symbol) throw new Error("ティッカーが未入力");
+      const raw = fetchAlphaSeriesByIntervalV14 ? await fetchAlphaSeriesByIntervalV14(target.symbol, interval) : await fetchAlphaDailySeries(target.symbol, "full");
+      series = sliceDays(raw, Number(days));
+    }
+
+    if(!series.length) throw new Error("チャートデータが空");
+
+    lastChartSeries = series;
+    const closes = series.map(x=>x.close);
+    const shortMa = movingAverage(closes, p.short);
+    const longMa = movingAverage(closes, p.long);
+    const label = `${target.label || target.symbol} ${intervalLabelV14(interval)} ${chartType === "candlestick" ? "candlestick" : "line"} / ${p.shortName} / ${p.longName}`;
+    drawChartV15(series, shortMa, longMa, label, p.shortName, p.longName, chartType);
+    const result = analyzeTechSeriesAdaptive(series, `${target.label || target.symbol} ${intervalLabelV14(interval)}`, target.kind === "crypto", interval);
+    document.getElementById("quickTechResult").textContent = result.text;
+
+    if(target.kind !== "crypto" && target.symbol && typeof calcTechnicalScoreFromSeries === "function"){
+      const tech = calcTechnicalScoreFromSeries(series);
+      if(typeof setCandidateScore === "function") setCandidateScore(target.symbol, tech);
+    }
+
+    setInputOrText("quickChartStatus", "取得・分析完了");
+    saveAll();
+  }catch(e){
+    setInputOrText("quickChartStatus", "取得失敗");
+    alert("チャート取得・分析に失敗した。\n\nAlpha Vantage無料枠に達している場合は翌日再実行。BTCはCoinGecko側で取得できる場合がある。\n\n詳細：" + sanitizeApiErrorMessage(e.message));
+  }
+}
+
+updateAlphaCounterDisplay();
+
+
+// ===== v16: chart auto refresh =====
+let chartAutoRefreshTimer = null;
+let lastChartRequestKeyV16 = "";
+let lastChartRawSeriesV16 = null;
+let lastChartRawKeyV16 = "";
+
+function effectiveChartDaysV16(interval, days){
+  const d = Number(days || 365);
+  if(interval === "monthly") return Math.max(d, 730);
+  if(interval === "weekly") return Math.max(d, 180);
+  return d;
+}
+
+function currentChartRequestKeyV16(){
+  const target = val("quickChartTarget");
+  const symbol = val("quickChartSymbol");
+  const interval = val("quickChartInterval") || "daily";
+  const days = val("quickChartDays") || "365";
+  const type = val("quickChartType") || "candlestick";
+  return [target, symbol, interval, days, type].join("|");
+}
+
+function shouldAutoRefreshChartV16(){
+  const el = document.getElementById("quickChartAutoRefresh");
+  return !el || el.value !== "no";
+}
+
+function scheduleChartAutoRefreshV16(reason="change"){
+  if(!shouldAutoRefreshChartV16()) return;
+  clearTimeout(chartAutoRefreshTimer);
+  setInputOrText("quickChartStatus", "自動更新待機");
+  chartAutoRefreshTimer = setTimeout(async ()=>{
+    try{
+      await quickFetchChartAndAnalyze();
+    }catch(e){
+      // quickFetchChartAndAnalyze itself handles alert/status
+    }
+  }, 500);
+}
+
+function setupChartAutoRefreshV16(){
+  const ids = [
+    "quickChartTarget",
+    "quickChartSymbol",
+    "quickChartInterval",
+    "quickChartDays",
+    "quickChartType"
+  ];
+  ids.forEach(id=>{
+    const el = document.getElementById(id);
+    if(!el || el.dataset.v16AutoBound === "yes") return;
+    const eventName = el.tagName === "INPUT" ? "input" : "change";
+    el.addEventListener(eventName, ()=>scheduleChartAutoRefreshV16(id));
+    el.dataset.v16AutoBound = "yes";
+  });
+}
+
+async function quickFetchChartAndAnalyze(){
+  try{
+    updateAlphaCounterDisplay && updateAlphaCounterDisplay();
+    const target = resolveChartSymbol();
+    const rawDays = val("quickChartDays") || "365";
+    const interval = val("quickChartInterval") || "daily";
+    const chartType = val("quickChartType") || "candlestick";
+    const effectiveDays = effectiveChartDaysV16(interval, rawDays);
+    const p = techPeriodsForInterval(interval);
+    setInputOrText("quickChartStatus", "取得中");
+
+    let series;
+    let rawCacheKey = `${target.kind}|${target.symbol}|${effectiveDays}`;
+    if(target.kind === "crypto"){
+      if(lastChartRawKeyV16 === rawCacheKey && lastChartRawSeriesV16){
+        series = lastChartRawSeriesV16;
+      }else{
+        const raw = await fetchBTCMarketChart(effectiveDays);
+        series = raw.map((x, i, arr) => {
+          const prev = i > 0 ? arr[i-1].close : x.close;
+          return {
+            date:x.date,
+            open:prev,
+            high:Math.max(prev, x.close),
+            low:Math.min(prev, x.close),
+            close:x.close,
+            volume:x.volume || 0
+          };
+        });
+        lastChartRawKeyV16 = rawCacheKey;
+        lastChartRawSeriesV16 = series;
+      }
+      series = aggregateSeriesV14(series, interval);
+    }else{
+      if(!target.symbol) throw new Error("ティッカーが未入力");
+      // Alpha Vantage is already rate-limited; do not over-cache beyond last request.
+      const raw = await fetchAlphaSeriesByIntervalV14(target.symbol, interval);
+      series = sliceDays(raw, Number(rawDays));
+    }
+
+    if(!series.length) throw new Error("チャートデータが空");
+
+    // If user chose too short visible period for weekly/monthly, use available generated series.
+    if(series.length < p.min && interval !== "daily"){
+      throw new Error(`${intervalLabelV14(interval)}の分析に必要なデータ数が不足。必要目安${p.min}本、現在${series.length}本。期間を730日にするか、日足に変える。`);
+    }
+
+    lastChartSeries = series;
+    const closes = series.map(x=>x.close);
+    const shortMa = movingAverage(closes, p.short);
+    const longMa = movingAverage(closes, p.long);
+    const label = `${target.label || target.symbol} ${intervalLabelV14(interval)} ${chartType === "candlestick" ? "candlestick" : "line"} / ${p.shortName} / ${p.longName}`;
+    drawChartV15(series, shortMa, longMa, label, p.shortName, p.longName, chartType);
+    const result = analyzeTechSeriesAdaptive(series, `${target.label || target.symbol} ${intervalLabelV14(interval)}`, target.kind === "crypto", interval);
+    document.getElementById("quickTechResult").textContent = result.text;
+
+    if(target.kind !== "crypto" && target.symbol && typeof calcTechnicalScoreFromSeries === "function"){
+      const tech = calcTechnicalScoreFromSeries(series);
+      if(typeof setCandidateScore === "function") setCandidateScore(target.symbol, tech);
+    }
+
+    setInputOrText("quickChartStatus", "取得・分析完了");
+    lastChartRequestKeyV16 = currentChartRequestKeyV16();
+    saveAll();
+  }catch(e){
+    setInputOrText("quickChartStatus", "取得失敗");
+    alert("チャート取得・分析に失敗した。\n\n足種・期間を変更すると自動更新する。Alpha Vantage無料枠に達している場合は翌日再実行。\n\n詳細：" + sanitizeApiErrorMessage(e.message));
+  }
+}
+
+
+// ===== v17: reliable auto refresh + BTC true OHLC =====
+let chartAutoRefreshTimerV17 = null;
+let v17AutoBound = false;
+let lastBtcOhlcCacheKeyV17 = "";
+let lastBtcOhlcCacheSeriesV17 = null;
+
+function coingeckoOhlcDaysV17(days){
+  const d = Number(days || 365);
+  if(d <= 1) return 1;
+  if(d <= 7) return 7;
+  if(d <= 14) return 14;
+  if(d <= 30) return 30;
+  if(d <= 90) return 90;
+  if(d <= 180) return 180;
+  return 365;
+}
+
+async function fetchBTCOHLCV17(days){
+  const cgDays = coingeckoOhlcDaysV17(days);
+  const headers = coingeckoHeaders ? coingeckoHeaders() : {};
+  const url = `https://api.coingecko.com/api/v3/coins/bitcoin/ohlc?vs_currency=usd&days=${encodeURIComponent(cgDays)}`;
+  const data = await fetchJson(url, {headers});
+  if(!Array.isArray(data) || !data.length) throw new Error("CoinGecko OHLCデータが空");
+  return data.map(r => ({
+    date: new Date(r[0]).toISOString().slice(0,10),
+    open: Number(r[1]),
+    high: Number(r[2]),
+    low: Number(r[3]),
+    close: Number(r[4]),
+    volume: 0
+  })).filter(x => isFinite(x.close));
+}
+
+function shouldAutoRefreshChartV17(){
+  const el = document.getElementById("quickChartAutoRefresh");
+  return !el || el.value !== "no";
+}
+
+function scheduleChartAutoRefreshV17(reason="change"){
+  if(!shouldAutoRefreshChartV17()) return;
+  clearTimeout(chartAutoRefreshTimerV17);
+  setInputOrText("quickChartStatus", "自動更新待機");
+  chartAutoRefreshTimerV17 = setTimeout(async ()=>{
+    await quickFetchChartAndAnalyze();
+  }, 450);
+}
+
+function setupChartAutoRefreshV17(){
+  const ids = [
+    "quickChartTarget",
+    "quickChartSymbol",
+    "quickChartInterval",
+    "quickChartDays",
+    "quickChartType"
+  ];
+  ids.forEach(id=>{
+    const el = document.getElementById(id);
+    if(!el) return;
+    if(el.dataset.v17AutoBound === "yes") return;
+    el.addEventListener("change", ()=>scheduleChartAutoRefreshV17(id));
+    el.addEventListener("input", ()=>scheduleChartAutoRefreshV17(id));
+    el.dataset.v17AutoBound = "yes";
+  });
+  v17AutoBound = true;
+}
+
+async function quickFetchChartAndAnalyze(){
+  try{
+    if(typeof updateAlphaCounterDisplay === "function") updateAlphaCounterDisplay();
+    if(!v17AutoBound) setupChartAutoRefreshV17();
+
+    const target = resolveChartSymbol();
+    const rawDays = val("quickChartDays") || "365";
+    const interval = val("quickChartInterval") || "daily";
+    const chartType = val("quickChartType") || "candlestick";
+    const effectiveDays = typeof effectiveChartDaysV16 === "function" ? effectiveChartDaysV16(interval, rawDays) : Number(rawDays || 365);
+    const p = techPeriodsForInterval(interval);
+    setInputOrText("quickChartStatus", "取得中");
+
+    let series;
+    if(target.kind === "crypto"){
+      const cacheKey = `${target.symbol}|${effectiveDays}`;
+      if(cacheKey === lastBtcOhlcCacheKeyV17 && lastBtcOhlcCacheSeriesV17){
+        series = lastBtcOhlcCacheSeriesV17;
+      }else{
+        try{
+          series = await fetchBTCOHLCV17(effectiveDays);
+        }catch(ohlcError){
+          // Fallback: market_chart pseudo candles
+          const raw = await fetchBTCMarketChart(effectiveDays);
+          series = raw.map((x, i, arr) => {
+            const prev = i > 0 ? arr[i-1].close : x.close;
+            return {
+              date:x.date,
+              open:prev,
+              high:Math.max(prev, x.close),
+              low:Math.min(prev, x.close),
+              close:x.close,
+              volume:x.volume || 0
+            };
+          });
+        }
+        lastBtcOhlcCacheKeyV17 = cacheKey;
+        lastBtcOhlcCacheSeriesV17 = series;
+      }
+      series = aggregateSeriesV14(series, interval);
+    }else{
+      if(!target.symbol) throw new Error("ティッカーが未入力");
+      const raw = await fetchAlphaSeriesByIntervalV14(target.symbol, interval);
+      series = sliceDays(raw, Number(rawDays));
+    }
+
+    if(!series.length) throw new Error("チャートデータが空");
+
+    if(series.length < p.min && interval !== "daily"){
+      throw new Error(`${intervalLabelV14(interval)}の分析に必要なデータ数が不足。必要目安${p.min}本、現在${series.length}本。期間を730日にするか、日足に変える。`);
+    }
+
+    lastChartSeries = series;
+    const closes = series.map(x=>x.close);
+    const shortMa = movingAverage(closes, p.short);
+    const longMa = movingAverage(closes, p.long);
+    const label = `${target.label || target.symbol} ${intervalLabelV14(interval)} ${chartType === "candlestick" ? "candlestick" : "line"} / ${p.shortName} / ${p.longName}`;
+
+    if(typeof drawChartV15 === "function"){
+      drawChartV15(series, shortMa, longMa, label, p.shortName, p.longName, chartType);
+    }else if(typeof drawChartV14 === "function"){
+      drawChartV14(series, shortMa, longMa, label, p.shortName, p.longName);
+    }else{
+      drawChart(series, shortMa, longMa, label);
+    }
+
+    const result = analyzeTechSeriesAdaptive(series, `${target.label || target.symbol} ${intervalLabelV14(interval)}`, target.kind === "crypto", interval);
+    document.getElementById("quickTechResult").textContent = result.text;
+
+    if(target.kind !== "crypto" && target.symbol && typeof calcTechnicalScoreFromSeries === "function"){
+      const tech = calcTechnicalScoreFromSeries(series);
+      if(typeof setCandidateScore === "function") setCandidateScore(target.symbol, tech);
+    }
+
+    setInputOrText("quickChartStatus", "取得・分析完了");
+    saveAll();
+  }catch(e){
+    setInputOrText("quickChartStatus", "取得失敗");
+    const msg = typeof sanitizeApiErrorMessage === "function" ? sanitizeApiErrorMessage(e.message) : e.message;
+    alert("チャート取得・分析に失敗した。\n\n足種・期間・表示形式を変更すると自動更新する。Alpha Vantage無料枠に達している場合は翌日再実行。\n\n詳細：" + msg);
+  }
+}
+
+function initV17AutoRefresh(){
+  setupChartAutoRefreshV17();
+}
+
+// Multiple hooks because local HTML/browser timing can vary
+setTimeout(initV17AutoRefresh, 300);
+setTimeout(initV17AutoRefresh, 1000);
+if(document.readyState === "loading"){
+  document.addEventListener("DOMContentLoaded", initV17AutoRefresh);
+}else{
+  initV17AutoRefresh();
+}
+window.addEventListener("load", initV17AutoRefresh);
+
+
+// ===== v18: period auto-correction + API saving =====
+let v18RawSeriesCache = {};
+let v18LastRenderedKey = "";
+
+function normalizeChartDaysV18(interval, selectedDays){
+  const raw = Number(selectedDays || 365);
+  let minDays = 365;
+  let reason = "補正なし";
+
+  if(interval === "daily"){
+    minDays = 365; // MA200とRSI確認を安定させる
+  }else if(interval === "weekly"){
+    minDays = 730; // 40週線とRSI確認を安定させる
+  }else if(interval === "monthly"){
+    minDays = 1825; // 24ヶ月線とRSI確認を安定させる
+  }
+
+  const corrected = Math.max(raw, minDays);
+  if(corrected !== raw){
+    reason = `${intervalLabelV14 ? intervalLabelV14(interval) : interval}は${corrected}日へ自動補正`;
+  }
+  return {selected: raw, corrected, reason};
+}
+
+function ensureChartDaysOptionV18(days){
+  const sel = document.getElementById("quickChartDays");
+  if(!sel) return;
+  const v = String(days);
+  if([...sel.options].some(o => o.value === v)) return;
+  const opt = document.createElement("option");
+  opt.value = v;
+  opt.textContent = days >= 365 ? `${Math.round(days/365)}年` : `${days}日`;
+  sel.appendChild(opt);
+}
+
+function getChartRawCacheKeyV18(target, interval, correctedDays){
+  return `${target.kind}|${target.symbol}|${interval}|${correctedDays}`;
+}
+
+function getChartRenderKeyV18(target, interval, correctedDays, chartType){
+  return `${getChartRawCacheKeyV18(target, interval, correctedDays)}|${chartType}`;
+}
+
+async function getRawSeriesForChartV18(target, interval, correctedDays){
+  const key = getChartRawCacheKeyV18(target, interval, correctedDays);
+  if(v18RawSeriesCache[key]) return v18RawSeriesCache[key];
+
+  let series;
+  if(target.kind === "crypto"){
+    // BTC: 365日以内の日足はOHLCを優先。長期や週足/月足はmarket_chartから集約。
+    if(interval === "daily" && correctedDays <= 365){
+      try{
+        series = await fetchBTCOHLCV17(correctedDays);
+      }catch(e){
+        const raw = await fetchBTCMarketChart(correctedDays);
+        series = raw.map((x, i, arr) => {
+          const prev = i > 0 ? arr[i-1].close : x.close;
+          return {
+            date:x.date,
+            open:prev,
+            high:Math.max(prev, x.close),
+            low:Math.min(prev, x.close),
+            close:x.close,
+            volume:x.volume || 0
+          };
+        });
+      }
+    }else{
+      const raw = await fetchBTCMarketChart(correctedDays);
+      series = raw.map((x, i, arr) => {
+        const prev = i > 0 ? arr[i-1].close : x.close;
+        return {
+          date:x.date,
+          open:prev,
+          high:Math.max(prev, x.close),
+          low:Math.min(prev, x.close),
+          close:x.close,
+          volume:x.volume || 0
+        };
+      });
+    }
+    series = aggregateSeriesV14(series, interval);
+  }else{
+    if(!target.symbol) throw new Error("ティッカーが未入力");
+    const raw = await fetchAlphaSeriesByIntervalV14(target.symbol, interval);
+    // weekly/monthly API already returns long enough history; daily full also returns long history
+    series = raw;
+  }
+
+  // Keep cache small
+  v18RawSeriesCache[key] = series;
+  const keys = Object.keys(v18RawSeriesCache);
+  if(keys.length > 8){
+    delete v18RawSeriesCache[keys[0]];
+  }
+  return series;
+}
+
+function sliceDisplaySeriesV18(series, interval, selectedDays){
+  // v18は分析安定を優先し、補正後データを表示対象にする。
+  // ただし日足だけは選択期間が365以上ならそのまま、短い場合も365へ補正される。
+  return series;
+}
+
+function analyzeTechSeriesV18(series, label, isBTC=false, interval="daily"){
+  const p = techPeriodsForInterval(interval);
+  const closes = (series || []).map(x=>x.close).filter(x=>isFinite(x));
+  if(!closes.length){
+    return {
+      text:`【結論】\n${label}：分析不可\n\n【理由】\nチャートデータが空。`,
+      shortMa:[], longMa:[]
+    };
+  }
+
+  const shortMa = movingAverage(closes, p.short);
+  const longMa = movingAverage(closes, p.long);
+  const last = closes[closes.length-1];
+  const lastShort = shortMa[shortMa.length-1];
+  const lastLong = longMa[longMa.length-1];
+  const r = closes.length >= 15 ? rsi(closes, 14) : null;
+
+  const lookback = series.slice(Math.max(0, series.length - Math.min(90, series.length)));
+  const support = Math.min(...lookback.map(x=>Number(x.low || x.close)).filter(x=>isFinite(x)));
+  const resistance = Math.max(...lookback.map(x=>Number(x.high || x.close)).filter(x=>isFinite(x)));
+  const periodHigh = Math.max(...closes);
+  const dd = periodHigh > 0 ? (periodHigh - last) / periodHigh * 100 : 0;
+
+  let trend = "中立";
+  if(lastShort && lastLong && last > lastShort && lastShort > lastLong) trend = "上昇基調";
+  else if(lastShort && lastLong && last < lastShort && lastShort < lastLong) trend = "下落基調";
+  else if(lastShort && last > lastShort) trend = "短期は強いが長期線は未確定";
+  else if(lastShort && last < lastShort) trend = "短期は弱い";
+
+  let heat = "中立";
+  if(r != null && r >= 70) heat = "過熱";
+  else if(r != null && r <= 30) heat = "売られ過ぎ";
+  else if(r != null && r <= 45) heat = "過熱感は弱い";
+
+  let decision = "監視";
+  let comment = "";
+  if(isBTC){
+    if(last > num("setBtcWaitAbove")){
+      decision = "BTCは原則見送り";
+      comment = "価格条件が未達。高値追いは避ける。";
+    }else if(r != null && r < 55){
+      decision = "BTCは再判定候補";
+      comment = "価格条件に入り、過熱感も限定的なら分割購入条件を確認する。";
+    }else{
+      decision = "BTCは条件付き監視";
+      comment = "価格条件、RSI、出来高、マクロ、資金余力を確認する。";
+    }
+  }else{
+    if(trend === "上昇基調" && heat !== "過熱") {
+      decision = "推奨候補";
+      comment = "トレンドは悪くない。ただし業績、出来高、ベース形成、地合い確認が必要。";
+    }else if(heat === "過熱"){
+      decision = "高値追い注意";
+      comment = "過熱感がある。だましや押し目を警戒。";
+    }else if(trend === "下落基調"){
+      decision = "見送り優勢";
+      comment = "移動平均線の並びが弱い。CAN SLIM的には買いにくい。";
+    }else{
+      decision = "監視継続";
+      comment = "チャート単体では強い優位性は断定できない。";
+    }
+  }
+
+  const dataNote = series.length < p.min
+    ? `\n【データ注意】\n必要目安${p.min}本に対し、現在${series.length}本。移動平均・RSIの信頼度は低い。`
+    : "";
+
+  setInputOrText("techLastPrice", fmtPrice(last));
+  setInputOrText("techMa50", fmtPrice(lastShort));
+  setInputOrText("techMa200", fmtPrice(lastLong));
+  setInputOrText("techRsi", r == null ? "-" : r.toFixed(1));
+
+  const txt =
+`【結論】
+${label}：${decision}
+
+【テクニカル】
+足種：${intervalLabelV14 ? intervalLabelV14(interval) : interval}
+データ本数：${series.length}本
+終値：${fmtPrice(last)}
+${p.shortName}：${fmtPrice(lastShort)}
+${p.longName}：${fmtPrice(lastLong)}
+RSI14：${r == null ? "-" : r.toFixed(1)}
+支持線目安：${isFinite(support) ? fmtPrice(support) : "-"}
+抵抗線目安：${isFinite(resistance) ? fmtPrice(resistance) : "-"}
+期間高値からの下落率：${dd.toFixed(1)}%
+トレンド：${trend}
+過熱感：${heat}${dataNote}
+
+【判断】
+${comment}
+
+【注意点】
+これはチャート条件の整理であり、売買指示ではない。
+個別株は業績成長、出来高、地合い、決算日、損切り位置を別途確認する。`;
+
+  lastChartAnalysisText = txt;
+  return {text:txt, shortMa, longMa, last, r, trend, heat, support, resistance, dd};
+}
+
+async function quickFetchChartAndAnalyze(){
+  try{
+    if(typeof updateAlphaCounterDisplay === "function") updateAlphaCounterDisplay();
+
+    const target = resolveChartSymbol();
+    const selectedDays = val("quickChartDays") || "365";
+    const interval = val("quickChartInterval") || "daily";
+    const chartType = val("quickChartType") || "candlestick";
+    const normalized = normalizeChartDaysV18(interval, selectedDays);
+    ensureChartDaysOptionV18(normalized.corrected);
+    if(String(selectedDays) !== String(normalized.corrected)){
+      const sel = document.getElementById("quickChartDays");
+      if(sel) sel.value = String(normalized.corrected);
+    }
+    setInputOrText("quickChartCorrection", normalized.reason);
+    setInputOrText("quickChartStatus", "取得中");
+
+    const rawSeries = await getRawSeriesForChartV18(target, interval, normalized.corrected);
+    const series = sliceDisplaySeriesV18(rawSeries, interval, normalized.corrected);
+    if(!series.length) throw new Error("チャートデータが空");
+
+    lastChartSeries = series;
+    const p = techPeriodsForInterval(interval);
+    const analysis = analyzeTechSeriesV18(series, `${target.label || target.symbol} ${intervalLabelV14 ? intervalLabelV14(interval) : interval}`, target.kind === "crypto", interval);
+    const label = `${target.label || target.symbol} ${intervalLabelV14 ? intervalLabelV14(interval) : interval} ${chartType === "candlestick" ? "candlestick" : "line"} / ${p.shortName} / ${p.longName}`;
+
+    if(typeof drawChartV15 === "function"){
+      drawChartV15(series, analysis.shortMa, analysis.longMa, label, p.shortName, p.longName, chartType);
+    }else if(typeof drawChartV14 === "function"){
+      drawChartV14(series, analysis.shortMa, analysis.longMa, label, p.shortName, p.longName);
+    }else{
+      drawChart(series, analysis.shortMa, analysis.longMa, label);
+    }
+
+    document.getElementById("quickTechResult").textContent = analysis.text;
+
+    if(target.kind !== "crypto" && target.symbol && typeof calcTechnicalScoreFromSeries === "function"){
+      const tech = calcTechnicalScoreFromSeries(series);
+      if(typeof setCandidateScore === "function") setCandidateScore(target.symbol, tech);
+    }
+
+    setInputOrText("quickChartStatus", "取得・分析完了");
+    v18LastRenderedKey = getChartRenderKeyV18(target, interval, normalized.corrected, chartType);
+    saveAll();
+  }catch(e){
+    setInputOrText("quickChartStatus", "取得失敗");
+    const msg = typeof sanitizeApiErrorMessage === "function" ? sanitizeApiErrorMessage(e.message) : e.message;
+    alert("チャート取得・分析に失敗した。\n\nv18では期間を自動補正するが、API制限やデータ欠損では失敗する場合がある。\n\n詳細：" + msg);
+  }
+}
+
+function scheduleChartAutoRefreshV18(reason="change"){
+  if(typeof shouldAutoRefreshChartV17 === "function" && !shouldAutoRefreshChartV17()) return;
+  if(window.chartAutoRefreshTimerV17) clearTimeout(window.chartAutoRefreshTimerV17);
+  setInputOrText("quickChartStatus", "自動更新待機");
+  window.chartAutoRefreshTimerV17 = setTimeout(async ()=>{
+    await quickFetchChartAndAnalyze();
+  }, 500);
+}
+
+function setupChartAutoRefreshV18(){
+  const ids = ["quickChartTarget","quickChartSymbol","quickChartInterval","quickChartDays","quickChartType"];
+  ids.forEach(id=>{
+    const el = document.getElementById(id);
+    if(!el) return;
+    if(el.dataset.v18AutoBound === "yes") return;
+    el.addEventListener("change", ()=>scheduleChartAutoRefreshV18(id));
+    el.addEventListener("input", ()=>scheduleChartAutoRefreshV18(id));
+    el.dataset.v18AutoBound = "yes";
+  });
+}
+
+setTimeout(setupChartAutoRefreshV18, 200);
+setTimeout(setupChartAutoRefreshV18, 800);
+window.addEventListener("load", setupChartAutoRefreshV18);
+
+
+// ===== v19: stable chart operation =====
+let v19ChartBusy = false;
+let v19MemoryChartCache = {};
+let v19LastGoodSeries = null;
+let v19LastGoodMeta = null;
+
+function v19NoAlertStatus(message){
+  setInputOrText("quickChartStatus", message || "取得失敗");
+}
+
+function v19SetTechMessage(text){
+  const box = document.getElementById("quickTechResult");
+  if(box) box.textContent = text;
+}
+
+function v19IntervalLabel(interval){
+  return (typeof intervalLabelV14 === "function")
+    ? intervalLabelV14(interval)
+    : ({daily:"日足", weekly:"週足", monthly:"月足"}[interval] || interval);
+}
+
+function v19Periods(interval){
+  if(typeof techPeriodsForInterval === "function") return techPeriodsForInterval(interval);
+  if(interval === "monthly") return {short:12, long:24, shortName:"12ヶ月線", longName:"24ヶ月線", min:12};
+  if(interval === "weekly") return {short:10, long:40, shortName:"10週線", longName:"40週線", min:20};
+  return {short:50, long:200, shortName:"MA50", longName:"MA200", min:60};
+}
+
+function v19NormalizeDays(targetKind, interval, selectedDays){
+  const raw = Number(selectedDays || 365);
+  let desired = raw;
+  let apiDays = raw;
+  let note = "補正なし";
+
+  if(interval === "daily") desired = Math.max(raw, 365);
+  if(interval === "weekly") desired = Math.max(raw, 730);
+  if(interval === "monthly") desired = Math.max(raw, 1825);
+
+  if(targetKind === "crypto"){
+    // CoinGecko無料環境では長期取得が不安定。安定優先で365日に制限。
+    apiDays = Math.min(desired, 365);
+    if(desired > 365){
+      note = `BTC無料API安定化のため${desired}日要求を365日に短縮。月足・長期線は未確定になりやすい。`;
+    }else if(desired !== raw){
+      note = `${v19IntervalLabel(interval)}は${desired}日へ自動補正`;
+    }
+  }else{
+    apiDays = desired;
+    if(desired !== raw) note = `${v19IntervalLabel(interval)}は${desired}日へ自動補正`;
+  }
+
+  return {raw, desired, apiDays, note};
+}
+
+function v19Aggregate(series, interval){
+  if(typeof aggregateSeriesV14 === "function") return aggregateSeriesV14(series, interval);
+  if(interval === "daily") return series;
+  const buckets = new Map();
+  for(const x of series){
+    const d = new Date(x.date + "T00:00:00Z");
+    let key;
+    if(interval === "weekly"){
+      const day = d.getUTCDay();
+      const diff = day === 0 ? -6 : 1 - day;
+      const monday = new Date(d);
+      monday.setUTCDate(d.getUTCDate() + diff);
+      key = monday.toISOString().slice(0,10);
+    }else{
+      key = x.date.slice(0,7) + "-01";
+    }
+    const close = Number(x.close);
+    const high = Number(x.high ?? x.close);
+    const low = Number(x.low ?? x.close);
+    const open = Number(x.open ?? x.close);
+    if(!buckets.has(key)){
+      buckets.set(key, {date:key, open, high, low, close, volume:Number(x.volume || 0)});
+    }else{
+      const b = buckets.get(key);
+      b.high = Math.max(b.high, high);
+      b.low = Math.min(b.low, low);
+      b.close = close;
+      b.volume += Number(x.volume || 0);
+    }
+  }
+  return Array.from(buckets.values()).sort((a,b)=>a.date.localeCompare(b.date));
+}
+
+async function v19FetchBTCSeries(apiDays, interval){
+  const cacheKey = `BTC|${apiDays}|${interval}`;
+  if(v19MemoryChartCache[cacheKey]) return v19MemoryChartCache[cacheKey];
+
+  let baseSeries = null;
+
+  // 365日以内の日足はOHLCを試す。失敗したらmarket_chartへ。
+  if(apiDays <= 365){
+    try{
+      if(typeof fetchBTCOHLCV17 === "function"){
+        baseSeries = await fetchBTCOHLCV17(apiDays);
+      }
+    }catch(e){
+      baseSeries = null;
+    }
+  }
+
+  if(!baseSeries){
+    const raw = await fetchBTCMarketChart(apiDays);
+    baseSeries = raw.map((x, i, arr) => {
+      const prev = i > 0 ? arr[i-1].close : x.close;
+      return {
+        date:x.date,
+        open:prev,
+        high:Math.max(prev, x.close),
+        low:Math.min(prev, x.close),
+        close:x.close,
+        volume:x.volume || 0
+      };
+    });
+  }
+
+  const series = v19Aggregate(baseSeries, interval);
+  v19MemoryChartCache[cacheKey] = series;
+  return series;
+}
+
+async function v19FetchEquitySeries(symbol, interval){
+  const cacheKey = `EQ|${symbol}|${interval}`;
+  if(v19MemoryChartCache[cacheKey]) return v19MemoryChartCache[cacheKey];
+
+  if(typeof getAlphaCounter === "function"){
+    const c = getAlphaCounter();
+    if(c.count >= 25){
+      throw new Error("Alpha Vantage無料枠25回/日の目安に到達。株式/ETFチャートは翌日再実行。");
+    }
+  }
+
+  let raw;
+  if(typeof fetchAlphaSeriesByIntervalV14 === "function"){
+    raw = await fetchAlphaSeriesByIntervalV14(symbol, interval);
+  }else if(typeof fetchAlphaDailySeries === "function"){
+    raw = await fetchAlphaDailySeries(symbol, "full");
+  }else{
+    throw new Error("株式チャート取得関数が見つからない。");
+  }
+
+  v19MemoryChartCache[cacheKey] = raw;
+  return raw;
+}
+
+function v19AnalyzeSeries(series, label, isBTC, interval, note){
+  const p = v19Periods(interval);
+  const closes = (series || []).map(x=>Number(x.close)).filter(x=>isFinite(x));
+  if(!closes.length){
+    return {text:`【結論】\n${label}：分析不可\n\n【理由】\nデータが空。`, shortMa:[], longMa:[]};
+  }
+
+  const shortMa = movingAverage(closes, p.short);
+  const longMa = movingAverage(closes, p.long);
+  const last = closes[closes.length - 1];
+  const lastShort = shortMa[shortMa.length - 1];
+  const lastLong = longMa[longMa.length - 1];
+  const r = closes.length >= 15 ? rsi(closes, 14) : null;
+
+  const lookback = series.slice(Math.max(0, series.length - Math.min(90, series.length)));
+  const lows = lookback.map(x=>Number(x.low || x.close)).filter(x=>isFinite(x));
+  const highs = lookback.map(x=>Number(x.high || x.close)).filter(x=>isFinite(x));
+  const support = lows.length ? Math.min(...lows) : NaN;
+  const resistance = highs.length ? Math.max(...highs) : NaN;
+  const high = Math.max(...closes);
+  const dd = high > 0 ? (high - last) / high * 100 : 0;
+
+  let trend = "中立";
+  if(lastShort && lastLong && last > lastShort && lastShort > lastLong) trend = "上昇基調";
+  else if(lastShort && lastLong && last < lastShort && lastShort < lastLong) trend = "下落基調";
+  else if(lastShort && last > lastShort) trend = "短期は強い";
+  else if(lastShort && last < lastShort) trend = "短期は弱い";
+
+  let heat = "中立";
+  if(r != null && r >= 70) heat = "過熱";
+  else if(r != null && r <= 30) heat = "売られ過ぎ";
+  else if(r != null && r <= 45) heat = "過熱感は弱い";
+
+  let decision = "監視継続";
+  let comment = "チャート単体では強い優位性は断定できない。";
+  if(isBTC){
+    if(last > num("setBtcWaitAbove")){
+      decision = "BTCは原則見送り";
+      comment = "価格条件が未達。高値追いは避ける。";
+    }else{
+      decision = "BTCは再判定候補";
+      comment = "価格条件に入った場合のみ、分割購入条件を確認する。";
+    }
+  }else if(trend === "上昇基調" && heat !== "過熱"){
+    decision = "推奨候補";
+    comment = "トレンドは悪くない。ただし業績、出来高、決算日、地合い確認が必要。";
+  }else if(trend === "下落基調"){
+    decision = "見送り優勢";
+    comment = "移動平均線の並びが弱い。";
+  }else if(heat === "過熱"){
+    decision = "高値追い注意";
+    comment = "過熱感がある。押し目・だましを警戒。";
+  }
+
+  setInputOrText("techLastPrice", fmtPrice(last));
+  setInputOrText("techMa50", fmtPrice(lastShort));
+  setInputOrText("techMa200", fmtPrice(lastLong));
+  setInputOrText("techRsi", r == null ? "-" : r.toFixed(1));
+
+  const confidence = series.length >= p.min ? "通常" : "低い";
+  const dataNote = series.length >= p.min
+    ? ""
+    : `\n【データ注意】\n必要目安${p.min}本に対し、現在${series.length}本。${p.longName}やRSIの信頼度は低い。`;
+
+  const txt =
+`【結論】
+${label}：${decision}
+
+【テクニカル】
+足種：${v19IntervalLabel(interval)}
+データ本数：${series.length}本
+信頼度：${confidence}
+終値：${fmtPrice(last)}
+${p.shortName}：${fmtPrice(lastShort)}
+${p.longName}：${fmtPrice(lastLong)}
+RSI14：${r == null ? "-" : r.toFixed(1)}
+支持線目安：${isFinite(support) ? fmtPrice(support) : "-"}
+抵抗線目安：${isFinite(resistance) ? fmtPrice(resistance) : "-"}
+期間高値からの下落率：${dd.toFixed(1)}%
+トレンド：${trend}
+過熱感：${heat}
+補正：${note || "なし"}${dataNote}
+
+【判断】
+${comment}
+
+【注意点】
+これはチャート条件の整理であり、売買指示ではない。`;
+
+  lastChartAnalysisText = txt;
+  return {text:txt, shortMa, longMa};
+}
+
+async function quickFetchChartAndAnalyze(){
+  if(v19ChartBusy){
+    setInputOrText("quickChartStatus", "処理中");
+    return;
+  }
+  v19ChartBusy = true;
+  try{
+    const target = resolveChartSymbol();
+    const interval = val("quickChartInterval") || "daily";
+    const chartType = val("quickChartType") || "candlestick";
+    const selectedDays = val("quickChartDays") || "365";
+    const normalized = v19NormalizeDays(target.kind, interval, selectedDays);
+
+    setInputOrText("quickChartCorrection", normalized.note);
+    setInputOrText("quickChartStatus", "取得中");
+
+    let series;
+    if(target.kind === "crypto"){
+      series = await v19FetchBTCSeries(normalized.apiDays, interval);
+    }else{
+      if(!target.symbol) throw new Error("ティッカーが未入力");
+      series = await v19FetchEquitySeries(target.symbol, interval);
+    }
+
+    if(!series || !series.length) throw new Error("チャートデータが空");
+
+    lastChartSeries = series;
+    v19LastGoodSeries = series;
+    v19LastGoodMeta = {target, interval, chartType, note:normalized.note};
+
+    const p = v19Periods(interval);
+    const analysis = v19AnalyzeSeries(series, `${target.label || target.symbol} ${v19IntervalLabel(interval)}`, target.kind === "crypto", interval, normalized.note);
+    const label = `${target.label || target.symbol} ${v19IntervalLabel(interval)} ${chartType === "candlestick" ? "candlestick" : "line"} / ${p.shortName} / ${p.longName}`;
+
+    if(typeof drawChartV15 === "function"){
+      drawChartV15(series, analysis.shortMa, analysis.longMa, label, p.shortName, p.longName, chartType);
+    }else if(typeof drawChartV14 === "function"){
+      drawChartV14(series, analysis.shortMa, analysis.longMa, label, p.shortName, p.longName);
+    }else{
+      drawChart(series, analysis.shortMa, analysis.longMa, label);
+    }
+
+    v19SetTechMessage(analysis.text);
+    setInputOrText("quickChartStatus", "取得・分析完了");
+    saveAll();
+  }catch(e){
+    const msg = typeof sanitizeApiErrorMessage === "function" ? sanitizeApiErrorMessage(e.message) : e.message;
+    setInputOrText("quickChartStatus", "取得失敗");
+    const fallback = v19LastGoodSeries && v19LastGoodMeta
+      ? "\n\n前回成功したチャートは画面に残している。"
+      : "";
+    v19SetTechMessage(`【結論】\nチャート取得・分析失敗\n\n【理由】\n${msg}${fallback}\n\n【対処】\n・BTCは365日以内で試す\n・株式/ETFはAlpha Vantage無料枠が回復する翌日に試す\n・表示形式だけ変える場合は、直前の成功データを使う`);
+  }finally{
+    v19ChartBusy = false;
+  }
+}
+
+function scheduleChartAutoRefreshV19(reason="change"){
+  const auto = document.getElementById("quickChartAutoRefresh");
+  if(auto && auto.value === "no") return;
+  clearTimeout(window.v19Timer);
+  setInputOrText("quickChartStatus", "自動更新待機");
+  window.v19Timer = setTimeout(()=>quickFetchChartAndAnalyze(), 700);
+}
+
+function setupChartAutoRefreshV19(){
+  ["quickChartTarget","quickChartSymbol","quickChartInterval","quickChartDays","quickChartType"].forEach(id=>{
+    const el = document.getElementById(id);
+    if(!el || el.dataset.v19Bound === "yes") return;
+    el.addEventListener("change", ()=>scheduleChartAutoRefreshV19(id));
+    el.addEventListener("input", ()=>scheduleChartAutoRefreshV19(id));
+    el.dataset.v19Bound = "yes";
+  });
+}
+
+setTimeout(setupChartAutoRefreshV19, 300);
+setTimeout(setupChartAutoRefreshV19, 1000);
+window.addEventListener("load", setupChartAutoRefreshV19);
+
+
+// ===== v20: simple 365-day chart only =====
+let v20Busy = false;
+let v20Cache = {};
+let v20Timer = null;
+
+function v20IntervalLabel(interval){
+  return {daily:"日足", weekly:"週足", monthly:"月足"}[interval] || interval;
+}
+
+function v20Periods(interval){
+  if(interval === "monthly") return {short:6, long:12, shortName:"6ヶ月線", longName:"12ヶ月線", min:6};
+  if(interval === "weekly") return {short:10, long:40, shortName:"10週線", longName:"40週線", min:10};
+  return {short:50, long:200, shortName:"MA50", longName:"MA200", min:50};
+}
+
+function v20SetFixedFields(){
+  const days = document.getElementById("quickChartDays");
+  if(days) days.value = "365";
+  const auto = document.getElementById("quickChartAutoRefresh");
+  if(auto) auto.value = "する";
+  const corr = document.getElementById("quickChartCorrection");
+  if(corr) corr.value = "365日固定";
+}
+
+function v20Aggregate(series, interval){
+  if(interval === "daily") return series;
+  const buckets = new Map();
+  for(const x of series){
+    const d = new Date(x.date + "T00:00:00Z");
+    let key;
+    if(interval === "weekly"){
+      const day = d.getUTCDay();
+      const diff = day === 0 ? -6 : 1 - day;
+      const monday = new Date(d);
+      monday.setUTCDate(d.getUTCDate() + diff);
+      key = monday.toISOString().slice(0,10);
+    }else{
+      key = x.date.slice(0,7) + "-01";
+    }
+    const open = Number(x.open ?? x.close);
+    const high = Number(x.high ?? x.close);
+    const low = Number(x.low ?? x.close);
+    const close = Number(x.close);
+    if(!buckets.has(key)){
+      buckets.set(key, {date:key, open, high, low, close, volume:Number(x.volume || 0)});
+    }else{
+      const b = buckets.get(key);
+      b.high = Math.max(b.high, high);
+      b.low = Math.min(b.low, low);
+      b.close = close;
+      b.volume += Number(x.volume || 0);
+    }
+  }
+  return Array.from(buckets.values()).sort((a,b)=>a.date.localeCompare(b.date));
+}
+
+function v20PseudoCandlesFromPriceSeries(raw){
+  return raw.map((x, i, arr) => {
+    const prev = i > 0 ? arr[i-1].close : x.close;
+    const close = Number(x.close);
+    const open = Number(prev);
+    return {
+      date: x.date,
+      open,
+      high: Math.max(open, close),
+      low: Math.min(open, close),
+      close,
+      volume: x.volume || 0
+    };
+  });
+}
+
+async function v20Fetch365DailyBase(target){
+  const key = `${target.kind}|${target.symbol || "BTC"}|365daily`;
+  if(v20Cache[key]) return v20Cache[key];
+
+  let daily;
+  if(target.kind === "crypto"){
+    // Stability first: use market_chart 365 days and pseudo OHLC.
+    // True exchange OHLC would require a different API. This avoids CoinGecko OHLC granularity problems.
+    const raw = await fetchBTCMarketChart(365);
+    daily = v20PseudoCandlesFromPriceSeries(raw);
+  }else{
+    if(!target.symbol) throw new Error("ティッカーが未入力");
+    if(typeof getAlphaCounter === "function"){
+      const c = getAlphaCounter();
+      if(c.count >= 25){
+        throw new Error("Alpha Vantage無料枠25回/日の目安に到達。株式/ETFチャートは翌日再実行。");
+      }
+    }
+    const raw = typeof fetchAlphaSeriesByIntervalV14 === "function"
+      ? await fetchAlphaSeriesByIntervalV14(target.symbol, "daily")
+      : await fetchAlphaDailySeries(target.symbol, "full");
+    // latest about 365 daily records
+    daily = raw.slice(Math.max(0, raw.length - 365));
+  }
+
+  v20Cache[key] = daily;
+  return daily;
+}
+
+function v20Analyze(series, target, interval){
+  const p = v20Periods(interval);
+  const closes = series.map(x=>Number(x.close)).filter(Number.isFinite);
+  const shortMa = movingAverage(closes, p.short);
+  const longMa = movingAverage(closes, p.long);
+  const last = closes[closes.length - 1];
+  const lastShort = shortMa[shortMa.length - 1];
+  const lastLong = longMa[longMa.length - 1];
+  const r = closes.length >= 15 ? rsi(closes, 14) : null;
+
+  const lookback = series.slice(Math.max(0, series.length - Math.min(90, series.length)));
+  const lows = lookback.map(x=>Number(x.low || x.close)).filter(Number.isFinite);
+  const highs = lookback.map(x=>Number(x.high || x.close)).filter(Number.isFinite);
+  const support = lows.length ? Math.min(...lows) : NaN;
+  const resistance = highs.length ? Math.max(...highs) : NaN;
+  const high = Math.max(...closes);
+  const dd = high > 0 ? (high - last) / high * 100 : 0;
+
+  let trend = "中立";
+  if(lastShort && lastLong && last > lastShort && lastShort > lastLong) trend = "上昇基調";
+  else if(lastShort && lastLong && last < lastShort && lastShort < lastLong) trend = "下落基調";
+  else if(lastShort && last > lastShort) trend = "短期は強い";
+  else if(lastShort && last < lastShort) trend = "短期は弱い";
+
+  let heat = "中立";
+  if(r != null && r >= 70) heat = "過熱";
+  else if(r != null && r <= 30) heat = "売られ過ぎ";
+  else if(r != null && r <= 45) heat = "過熱感は弱い";
+
+  let decision = "監視継続";
+  let comment = "チャート単体では強い優位性は断定できない。";
+  if(target.kind === "crypto"){
+    if(last > num("setBtcWaitAbove")){
+      decision = "BTCは原則見送り";
+      comment = "価格条件が未達。高値追いは避ける。";
+    }else{
+      decision = "BTCは再判定候補";
+      comment = "価格条件に入った場合のみ、分割購入条件を確認する。";
+    }
+  }else if(trend === "上昇基調" && heat !== "過熱"){
+    decision = "推奨候補";
+    comment = "トレンドは悪くない。ただし業績、出来高、決算日、地合い確認が必要。";
+  }else if(trend === "下落基調"){
+    decision = "見送り優勢";
+    comment = "移動平均線の並びが弱い。";
+  }else if(heat === "過熱"){
+    decision = "高値追い注意";
+    comment = "過熱感がある。押し目・だましを警戒。";
+  }
+
+  setInputOrText("techLastPrice", fmtPrice(last));
+  setInputOrText("techMa50", fmtPrice(lastShort));
+  setInputOrText("techMa200", fmtPrice(lastLong));
+  setInputOrText("techRsi", r == null ? "-" : r.toFixed(1));
+
+  const confidence = series.length >= p.min ? "通常" : "低い";
+  const dataNote = series.length >= p.min ? "" : `\n【データ注意】\n${v20IntervalLabel(interval)}の本数が少ないため、判定信頼度は低い。`;
+
+  const label = `${target.label || target.symbol} ${v20IntervalLabel(interval)}`;
+  const txt =
+`【結論】
+${label}：${decision}
+
+【テクニカル】
+期間：365日固定
+足種：${v20IntervalLabel(interval)}
+データ本数：${series.length}本
+信頼度：${confidence}
+終値：${fmtPrice(last)}
+${p.shortName}：${fmtPrice(lastShort)}
+${p.longName}：${fmtPrice(lastLong)}
+RSI14：${r == null ? "-" : r.toFixed(1)}
+支持線目安：${isFinite(support) ? fmtPrice(support) : "-"}
+抵抗線目安：${isFinite(resistance) ? fmtPrice(resistance) : "-"}
+期間高値からの下落率：${dd.toFixed(1)}%
+トレンド：${trend}
+過熱感：${heat}${dataNote}
+
+【判断】
+${comment}
+
+【注意点】
+これはチャート条件の整理であり、売買指示ではない。
+BTCのローソク足は365日価格データからの疑似OHLC。特定取引所の厳密なヒゲとは異なる。`;
+
+  lastChartAnalysisText = txt;
+  return {text:txt, shortMa, longMa, p};
+}
+
+async function quickFetchChartAndAnalyze(){
+  if(v20Busy){
+    setInputOrText("quickChartStatus", "処理中");
+    return;
+  }
+  v20Busy = true;
+  try{
+    v20SetFixedFields();
+    const target = resolveChartSymbol();
+    const interval = val("quickChartInterval") || "daily";
+    const chartType = val("quickChartType") || "candlestick";
+
+    setInputOrText("quickChartStatus", "取得中");
+    const daily = await v20Fetch365DailyBase(target);
+    const series = v20Aggregate(daily, interval);
+
+    if(!series.length) throw new Error("チャートデータが空");
+
+    lastChartSeries = series;
+    const analysis = v20Analyze(series, target, interval);
+    const label = `${target.label || target.symbol} ${v20IntervalLabel(interval)} ${chartType === "candlestick" ? "candlestick" : "line"} / ${analysis.p.shortName} / ${analysis.p.longName}`;
+
+    if(typeof drawChartV15 === "function"){
+      drawChartV15(series, analysis.shortMa, analysis.longMa, label, analysis.p.shortName, analysis.p.longName, chartType);
+    }else if(typeof drawChartV14 === "function"){
+      drawChartV14(series, analysis.shortMa, analysis.longMa, label, analysis.p.shortName, analysis.p.longName);
+    }else{
+      drawChart(series, analysis.shortMa, analysis.longMa, label);
+    }
+
+    const box = document.getElementById("quickTechResult");
+    if(box) box.textContent = analysis.text;
+    setInputOrText("quickChartStatus", "取得・分析完了");
+    saveAll();
+  }catch(e){
+    const msg = typeof sanitizeApiErrorMessage === "function" ? sanitizeApiErrorMessage(e.message) : e.message;
+    setInputOrText("quickChartStatus", "取得失敗");
+    const box = document.getElementById("quickTechResult");
+    if(box) box.textContent =
+`【結論】
+チャート取得・分析失敗
+
+【理由】
+${msg}
+
+【対処】
+・BTCなら時間を空けて再実行
+・株式/ETFならAlpha Vantage無料枠の回復後に再実行
+・表示形式だけ変えたい場合は、先に一度チャート取得を成功させる`;
+  }finally{
+    v20Busy = false;
+  }
+}
+
+function scheduleChartAutoRefreshV20(){
+  clearTimeout(v20Timer);
+  setInputOrText("quickChartStatus", "自動更新待機");
+  v20Timer = setTimeout(()=>quickFetchChartAndAnalyze(), 500);
+}
+
+function setupChartAutoRefreshV20(){
+  v20SetFixedFields();
+  ["quickChartTarget","quickChartSymbol","quickChartInterval","quickChartType"].forEach(id=>{
+    const el = document.getElementById(id);
+    if(!el || el.dataset.v20Bound === "yes") return;
+    el.addEventListener("change", scheduleChartAutoRefreshV20);
+    el.addEventListener("input", scheduleChartAutoRefreshV20);
+    el.dataset.v20Bound = "yes";
+  });
+  // Period is fixed. Do not bind quickChartDays.
+}
+
+setTimeout(setupChartAutoRefreshV20, 200);
+setTimeout(setupChartAutoRefreshV20, 800);
+window.addEventListener("load", setupChartAutoRefreshV20);
+
+
+// ===== v21: BTC daily OHLC wicks + monthly labels =====
+let v21Cache = {};
+let v21Busy = false;
+let v21Timer = null;
+
+function v21MonthLabel(dateStr){
+  const d = new Date(dateStr + "T00:00:00Z");
+  if(isNaN(d.getTime())) return "";
+  return `${d.getUTCFullYear()}/${String(d.getUTCMonth()+1).padStart(2,"0")}`;
+}
+
+function v21ShouldShowMonthLabels(){
+  const el = document.getElementById("quickMonthLabels");
+  return !el || el.value !== "no";
+}
+
+async function v21FetchBTCOHLC365(){
+  const headers = typeof coingeckoHeaders === "function" ? coingeckoHeaders() : {};
+  const url = "https://api.coingecko.com/api/v3/coins/bitcoin/ohlc?vs_currency=usd&days=365";
+  const data = await fetchJson(url, {headers});
+  if(!Array.isArray(data) || !data.length) throw new Error("BTC OHLCデータが空");
+  return data.map(r => ({
+    date: new Date(r[0]).toISOString().slice(0,10),
+    open: Number(r[1]),
+    high: Number(r[2]),
+    low: Number(r[3]),
+    close: Number(r[4]),
+    volume: 0
+  })).filter(x => Number.isFinite(x.close));
+}
+
+function v21PseudoCandlesFromPriceSeries(raw){
+  return raw.map((x, i, arr) => {
+    const prev = i > 0 ? arr[i-1].close : x.close;
+    const close = Number(x.close);
+    const open = Number(prev);
+    return {
+      date: x.date,
+      open,
+      high: Math.max(open, close),
+      low: Math.min(open, close),
+      close,
+      volume: x.volume || 0
+    };
+  });
+}
+
+async function v21Fetch365DailyBase(target){
+  const key = `${target.kind}|${target.symbol || "BTC"}|365daily`;
+  if(v21Cache[key]) return v21Cache[key];
+
+  let daily;
+  if(target.kind === "crypto"){
+    try{
+      // v21: BTC日足はヒゲ付きOHLCを優先
+      daily = await v21FetchBTCOHLC365();
+    }catch(e){
+      // fallback: 価格履歴から疑似OHLC
+      const raw = await fetchBTCMarketChart(365);
+      daily = v21PseudoCandlesFromPriceSeries(raw);
+    }
+  }else{
+    if(!target.symbol) throw new Error("ティッカーが未入力");
+    if(typeof getAlphaCounter === "function"){
+      const c = getAlphaCounter();
+      if(c.count >= 25){
+        throw new Error("Alpha Vantage無料枠25回/日の目安に到達。株式/ETFチャートは翌日再実行。");
+      }
+    }
+    const raw = typeof fetchAlphaSeriesByIntervalV14 === "function"
+      ? await fetchAlphaSeriesByIntervalV14(target.symbol, "daily")
+      : await fetchAlphaDailySeries(target.symbol, "full");
+    daily = raw.slice(Math.max(0, raw.length - 365));
+  }
+
+  v21Cache[key] = daily;
+  return daily;
+}
+
+function v21Aggregate(series, interval){
+  if(interval === "daily") return series;
+  const buckets = new Map();
+  for(const x of series){
+    const d = new Date(x.date + "T00:00:00Z");
+    let key;
+    if(interval === "weekly"){
+      const day = d.getUTCDay();
+      const diff = day === 0 ? -6 : 1 - day;
+      const monday = new Date(d);
+      monday.setUTCDate(d.getUTCDate() + diff);
+      key = monday.toISOString().slice(0,10);
+    }else{
+      key = x.date.slice(0,7) + "-01";
+    }
+    const open = Number(x.open ?? x.close);
+    const high = Number(x.high ?? x.close);
+    const low = Number(x.low ?? x.close);
+    const close = Number(x.close);
+    if(!buckets.has(key)){
+      buckets.set(key, {date:key, open, high, low, close, volume:Number(x.volume || 0)});
+    }else{
+      const b = buckets.get(key);
+      b.high = Math.max(b.high, high);
+      b.low = Math.min(b.low, low);
+      b.close = close;
+      b.volume += Number(x.volume || 0);
+    }
+  }
+  return Array.from(buckets.values()).sort((a,b)=>a.date.localeCompare(b.date));
+}
+
+function v21Periods(interval){
+  if(interval === "monthly") return {short:6, long:12, shortName:"6ヶ月線", longName:"12ヶ月線", min:6};
+  if(interval === "weekly") return {short:10, long:40, shortName:"10週線", longName:"40週線", min:10};
+  return {short:50, long:200, shortName:"MA50", longName:"MA200", min:50};
+}
+
+function v21IntervalLabel(interval){
+  return {daily:"日足", weekly:"週足", monthly:"月足"}[interval] || interval;
+}
+
+function v21DrawChart(series, shortMa, longMa, label, shortName, longName, chartType){
+  const canvas = document.getElementById("quickChartCanvas");
+  if(!canvas || !series.length) return;
+  const rect = canvas.getBoundingClientRect();
+  const dpr = window.devicePixelRatio || 1;
+  canvas.width = Math.max(600, Math.floor(rect.width * dpr));
+  canvas.height = Math.floor(380 * dpr);
+  const ctx = canvas.getContext("2d");
+  const W = canvas.width, H = canvas.height;
+  const padL = 62*dpr, padR = 22*dpr, padT = 26*dpr, padB = 44*dpr;
+  ctx.clearRect(0,0,W,H);
+  ctx.fillStyle = "#ffffff";
+  ctx.fillRect(0,0,W,H);
+
+  const vals = [];
+  series.forEach(x=>{
+    vals.push(Number(x.close));
+    if(Number.isFinite(Number(x.high))) vals.push(Number(x.high));
+    if(Number.isFinite(Number(x.low))) vals.push(Number(x.low));
+  });
+  shortMa.forEach(x=>{ if(x!=null) vals.push(x); });
+  longMa.forEach(x=>{ if(x!=null) vals.push(x); });
+  let min = Math.min(...vals), max = Math.max(...vals);
+  const margin = (max-min)*0.08 || max*0.05 || 1;
+  min -= margin; max += margin;
+  const xOf = i => padL + (i/(series.length-1 || 1))*(W-padL-padR);
+  const yOf = v => padT + (max-v)/(max-min)*(H-padT-padB);
+
+  // horizontal grid
+  ctx.strokeStyle = "#e5e7eb";
+  ctx.lineWidth = 1*dpr;
+  ctx.font = `${11*dpr}px sans-serif`;
+  ctx.fillStyle = "#6b7280";
+  for(let g=0; g<=4; g++){
+    const y = padT + g*(H-padT-padB)/4;
+    ctx.beginPath(); ctx.moveTo(padL, y); ctx.lineTo(W-padR, y); ctx.stroke();
+    const val = max - g*(max-min)/4;
+    ctx.fillText(val.toFixed(2), 6*dpr, y+4*dpr);
+  }
+
+  // monthly separators and labels
+  if(v21ShouldShowMonthLabels()){
+    ctx.strokeStyle = "#f3f4f6";
+    ctx.fillStyle = "#6b7280";
+    ctx.font = `${10*dpr}px sans-serif`;
+    let lastMonth = "";
+    series.forEach((s,i)=>{
+      const ym = s.date.slice(0,7);
+      if(ym !== lastMonth){
+        const x = xOf(i);
+        if(i > 0){
+          ctx.beginPath();
+          ctx.moveTo(x, padT);
+          ctx.lineTo(x, H-padB);
+          ctx.stroke();
+        }
+        // label every month for monthly/weekly, every 2 months if daily too crowded
+        const show = series.length < 120 || i === 0 || Number(ym.slice(5,7)) % 2 === 1;
+        if(show) ctx.fillText(ym.replace("-","/"), x+2*dpr, H-14*dpr);
+        lastMonth = ym;
+      }
+    });
+  }
+
+  function line(data, color, width=2){
+    ctx.strokeStyle = color;
+    ctx.lineWidth = width*dpr;
+    ctx.beginPath();
+    let started = false;
+    data.forEach((v,i)=>{
+      if(v == null || !Number.isFinite(v)) return;
+      const x = xOf(i), y = yOf(v);
+      if(!started){ ctx.moveTo(x,y); started = true; }
+      else ctx.lineTo(x,y);
+    });
+    ctx.stroke();
+  }
+
+  if(chartType === "candlestick"){
+    const spacing = (W-padL-padR)/(series.length || 1);
+    const bodyW = Math.max(2*dpr, Math.min(10*dpr, spacing*0.55));
+    series.forEach((s,i)=>{
+      const x = xOf(i);
+      const o = Number(s.open ?? s.close);
+      const c = Number(s.close);
+      const h = Number(s.high ?? Math.max(o,c));
+      const l = Number(s.low ?? Math.min(o,c));
+      const up = c >= o;
+      ctx.strokeStyle = up ? "#166534" : "#b91c1c";
+      ctx.fillStyle = up ? "#dcfce7" : "#fee2e2";
+      ctx.lineWidth = 1*dpr;
+
+      // wick
+      ctx.beginPath();
+      ctx.moveTo(x, yOf(h));
+      ctx.lineTo(x, yOf(l));
+      ctx.stroke();
+
+      // body
+      const y1 = yOf(Math.max(o,c));
+      const y2 = yOf(Math.min(o,c));
+      const bh = Math.max(1.5*dpr, y2-y1);
+      ctx.fillRect(x-bodyW/2, y1, bodyW, bh);
+      ctx.strokeRect(x-bodyW/2, y1, bodyW, bh);
+    });
+  }else{
+    line(series.map(x=>x.close), "#111827", 2.2);
+  }
+
+  line(shortMa, "#2563eb", 1.4);
+  line(longMa, "#dc2626", 1.4);
+
+  ctx.fillStyle = "#111827";
+  ctx.font = `${13*dpr}px sans-serif`;
+  ctx.fillText(label, padL, 16*dpr);
+  ctx.fillStyle = "#111827"; ctx.fillText(chartType === "candlestick" ? "ローソク" : "価格", W-270*dpr, 18*dpr);
+  ctx.fillStyle = "#2563eb"; ctx.fillText(shortName, W-190*dpr, 18*dpr);
+  ctx.fillStyle = "#dc2626"; ctx.fillText(longName, W-105*dpr, 18*dpr);
+
+  const first = series[0]?.date || "";
+  const last = series[series.length-1]?.date || "";
+  ctx.fillStyle = "#6b7280";
+  ctx.font = `${11*dpr}px sans-serif`;
+  ctx.fillText(first, padL, H-4*dpr);
+  ctx.fillText(last, W-110*dpr, H-4*dpr);
+}
+
+function v21Analyze(series, target, interval){
+  const p = v21Periods(interval);
+  const closes = series.map(x=>Number(x.close)).filter(Number.isFinite);
+  const shortMa = movingAverage(closes, p.short);
+  const longMa = movingAverage(closes, p.long);
+  const last = closes[closes.length - 1];
+  const lastShort = shortMa[shortMa.length - 1];
+  const lastLong = longMa[longMa.length - 1];
+  const r = closes.length >= 15 ? rsi(closes, 14) : null;
+
+  const lookback = series.slice(Math.max(0, series.length - Math.min(90, series.length)));
+  const lows = lookback.map(x=>Number(x.low || x.close)).filter(Number.isFinite);
+  const highs = lookback.map(x=>Number(x.high || x.close)).filter(Number.isFinite);
+  const support = lows.length ? Math.min(...lows) : NaN;
+  const resistance = highs.length ? Math.max(...highs) : NaN;
+  const high = Math.max(...closes);
+  const dd = high > 0 ? (high - last) / high * 100 : 0;
+
+  let trend = "中立";
+  if(lastShort && lastLong && last > lastShort && lastShort > lastLong) trend = "上昇基調";
+  else if(lastShort && lastLong && last < lastShort && lastShort < lastLong) trend = "下落基調";
+  else if(lastShort && last > lastShort) trend = "短期は強い";
+  else if(lastShort && last < lastShort) trend = "短期は弱い";
+
+  let heat = "中立";
+  if(r != null && r >= 70) heat = "過熱";
+  else if(r != null && r <= 30) heat = "売られ過ぎ";
+  else if(r != null && r <= 45) heat = "過熱感は弱い";
+
+  let decision = "監視継続";
+  let comment = "チャート単体では強い優位性は断定できない。";
+  if(target.kind === "crypto"){
+    if(last > num("setBtcWaitAbove")){
+      decision = "BTCは原則見送り";
+      comment = "価格条件が未達。高値追いは避ける。";
+    }else{
+      decision = "BTCは再判定候補";
+      comment = "価格条件に入った場合のみ、分割購入条件を確認する。";
+    }
+  }else if(trend === "上昇基調" && heat !== "過熱"){
+    decision = "推奨候補";
+    comment = "トレンドは悪くない。ただし業績、出来高、決算日、地合い確認が必要。";
+  }else if(trend === "下落基調"){
+    decision = "見送り優勢";
+    comment = "移動平均線の並びが弱い。";
+  }else if(heat === "過熱"){
+    decision = "高値追い注意";
+    comment = "過熱感がある。押し目・だましを警戒。";
+  }
+
+  setInputOrText("techLastPrice", fmtPrice(last));
+  setInputOrText("techMa50", fmtPrice(lastShort));
+  setInputOrText("techMa200", fmtPrice(lastLong));
+  setInputOrText("techRsi", r == null ? "-" : r.toFixed(1));
+
+  const confidence = series.length >= p.min ? "通常" : "低い";
+  const txt =
+`【結論】
+${target.label || target.symbol} ${v21IntervalLabel(interval)}：${decision}
+
+【テクニカル】
+期間：365日固定
+足種：${v21IntervalLabel(interval)}
+月表示：${v21ShouldShowMonthLabels() ? "あり" : "なし"}
+データ本数：${series.length}本
+信頼度：${confidence}
+終値：${fmtPrice(last)}
+${p.shortName}：${fmtPrice(lastShort)}
+${p.longName}：${fmtPrice(lastLong)}
+RSI14：${r == null ? "-" : r.toFixed(1)}
+支持線目安：${Number.isFinite(support) ? fmtPrice(support) : "-"}
+抵抗線目安：${Number.isFinite(resistance) ? fmtPrice(resistance) : "-"}
+期間高値からの下落率：${dd.toFixed(1)}%
+トレンド：${trend}
+過熱感：${heat}
+
+【判断】
+${comment}
+
+【注意点】
+BTC日足はCoinGecko OHLCを優先。取得失敗時は365日価格データから疑似OHLC化する。
+特定取引所の厳密なヒゲとは異なる可能性がある。`;
+
+  lastChartAnalysisText = txt;
+  return {text:txt, shortMa, longMa, p};
+}
+
+async function quickFetchChartAndAnalyze(){
+  if(window.v21Busy){
+    setInputOrText("quickChartStatus", "処理中");
+    return;
+  }
+  window.v21Busy = true;
+  try{
+    const days = document.getElementById("quickChartDays");
+    if(days) days.value = "365";
+    const auto = document.getElementById("quickChartAutoRefresh");
+    if(auto) auto.value = "する";
+    const corr = document.getElementById("quickChartCorrection");
+    if(corr) corr.value = "365日固定";
+
+    const target = resolveChartSymbol();
+    const interval = val("quickChartInterval") || "daily";
+    const chartType = val("quickChartType") || "candlestick";
+
+    setInputOrText("quickChartStatus", "取得中");
+    const daily = await v21Fetch365DailyBase(target);
+    const series = v21Aggregate(daily, interval);
+    if(!series.length) throw new Error("チャートデータが空");
+
+    lastChartSeries = series;
+    const analysis = v21Analyze(series, target, interval);
+    const label = `${target.label || target.symbol} ${v21IntervalLabel(interval)} ${chartType === "candlestick" ? "candlestick" : "line"} / ${analysis.p.shortName} / ${analysis.p.longName}`;
+    v21DrawChart(series, analysis.shortMa, analysis.longMa, label, analysis.p.shortName, analysis.p.longName, chartType);
+
+    const box = document.getElementById("quickTechResult");
+    if(box) box.textContent = analysis.text;
+
+    setInputOrText("quickChartStatus", "取得・分析完了");
+    saveAll();
+  }catch(e){
+    const msg = typeof sanitizeApiErrorMessage === "function" ? sanitizeApiErrorMessage(e.message) : e.message;
+    setInputOrText("quickChartStatus", "取得失敗");
+    const box = document.getElementById("quickTechResult");
+    if(box) box.textContent =
+`【結論】
+チャート取得・分析失敗
+
+【理由】
+${msg}
+
+【対処】
+・BTCなら時間を空けて再実行
+・株式/ETFならAlpha Vantage無料枠の回復後に再実行`;
+  }finally{
+    window.v21Busy = false;
+  }
+}
+
+function scheduleChartAutoRefreshV21(){
+  clearTimeout(window.v21Timer);
+  setInputOrText("quickChartStatus", "自動更新待機");
+  window.v21Timer = setTimeout(()=>quickFetchChartAndAnalyze(), 500);
+}
+
+function setupChartAutoRefreshV21(){
+  ["quickChartTarget","quickChartSymbol","quickChartInterval","quickChartType","quickMonthLabels"].forEach(id=>{
+    const el = document.getElementById(id);
+    if(!el || el.dataset.v21Bound === "yes") return;
+    el.addEventListener("change", scheduleChartAutoRefreshV21);
+    el.addEventListener("input", scheduleChartAutoRefreshV21);
+    el.dataset.v21Bound = "yes";
+  });
+}
+
+setTimeout(setupChartAutoRefreshV21, 200);
+setTimeout(setupChartAutoRefreshV21, 800);
+window.addEventListener("load", setupChartAutoRefreshV21);
+
+
+// ===== v22: month label fix =====
+function v22MonthShort(dateStr){
+  const d = new Date(dateStr + "T00:00:00Z");
+  if(isNaN(d.getTime())) return "";
+  return `${String(d.getUTCFullYear()).slice(2)}/${String(d.getUTCMonth()+1).padStart(2,"0")}`;
+}
+
+function v22DayShort(dateStr){
+  const d = new Date(dateStr + "T00:00:00Z");
+  if(isNaN(d.getTime())) return "";
+  return `${String(d.getUTCFullYear()).slice(2)}/${String(d.getUTCMonth()+1).padStart(2,"0")}/${String(d.getUTCDate()).padStart(2,"0")}`;
+}
+
+function v22DrawChart(series, shortMa, longMa, label, shortName, longName, chartType){
+  const canvas = document.getElementById("quickChartCanvas");
+  if(!canvas || !series.length) return;
+  const rect = canvas.getBoundingClientRect();
+  const dpr = window.devicePixelRatio || 1;
+  canvas.width = Math.max(600, Math.floor(rect.width * dpr));
+  canvas.height = Math.floor(390 * dpr);
+  const ctx = canvas.getContext("2d");
+  const W = canvas.width, H = canvas.height;
+  const padL = 62*dpr, padR = 22*dpr, padT = 26*dpr, padB = 52*dpr;
+  ctx.clearRect(0,0,W,H);
+  ctx.fillStyle = "#ffffff";
+  ctx.fillRect(0,0,W,H);
+
+  const vals = [];
+  series.forEach(x=>{
+    vals.push(Number(x.close));
+    if(Number.isFinite(Number(x.high))) vals.push(Number(x.high));
+    if(Number.isFinite(Number(x.low))) vals.push(Number(x.low));
+  });
+  shortMa.forEach(x=>{ if(x!=null) vals.push(x); });
+  longMa.forEach(x=>{ if(x!=null) vals.push(x); });
+  let min = Math.min(...vals), max = Math.max(...vals);
+  const margin = (max-min)*0.08 || max*0.05 || 1;
+  min -= margin; max += margin;
+  const xOf = i => padL + (i/(series.length-1 || 1))*(W-padL-padR);
+  const yOf = v => padT + (max-v)/(max-min)*(H-padT-padB);
+
+  // horizontal grid
+  ctx.strokeStyle = "#e5e7eb";
+  ctx.lineWidth = 1*dpr;
+  ctx.font = `${11*dpr}px sans-serif`;
+  ctx.fillStyle = "#6b7280";
+  for(let g=0; g<=4; g++){
+    const y = padT + g*(H-padT-padB)/4;
+    ctx.beginPath(); ctx.moveTo(padL, y); ctx.lineTo(W-padR, y); ctx.stroke();
+    const val = max - g*(max-min)/4;
+    ctx.fillText(val.toFixed(2), 6*dpr, y+4*dpr);
+  }
+
+  // month separators and compact year/month labels
+  if(typeof v21ShouldShowMonthLabels === "function" ? v21ShouldShowMonthLabels() : true){
+    ctx.strokeStyle = "#f3f4f6";
+    ctx.fillStyle = "#6b7280";
+    ctx.font = `${10*dpr}px sans-serif`;
+    let lastMonth = "";
+    let monthIndex = 0;
+    const usedX = [];
+    series.forEach((s,i)=>{
+      const ym = s.date.slice(0,7);
+      if(ym !== lastMonth){
+        const x = xOf(i);
+        if(i > 0){
+          ctx.beginPath();
+          ctx.moveTo(x, padT);
+          ctx.lineTo(x, H-padB);
+          ctx.stroke();
+        }
+
+        // daily chart: label every 2 months, but always show first and last month if they do not overlap
+        const isFirst = i === 0;
+        const isLastMonth = series.slice(i+1).every(t => t.date.slice(0,7) === ym);
+        const shouldShow = series.length <= 80 || isFirst || isLastMonth || monthIndex % 2 === 0;
+
+        if(shouldShow){
+          const labelText = v22MonthShort(s.date);
+          const labelWidth = ctx.measureText(labelText).width;
+          const tooClose = usedX.some(px => Math.abs(px - x) < 42*dpr);
+          const tooNearRightEdge = x + labelWidth > W - padR - 4*dpr;
+          if(!tooClose && !tooNearRightEdge){
+            ctx.fillText(labelText, x+2*dpr, H-22*dpr);
+            usedX.push(x);
+          }
+        }
+        lastMonth = ym;
+        monthIndex++;
+      }
+    });
+  }
+
+  function line(data, color, width=2){
+    ctx.strokeStyle = color;
+    ctx.lineWidth = width*dpr;
+    ctx.beginPath();
+    let started = false;
+    data.forEach((v,i)=>{
+      if(v == null || !Number.isFinite(v)) return;
+      const x = xOf(i), y = yOf(v);
+      if(!started){ ctx.moveTo(x,y); started = true; }
+      else ctx.lineTo(x,y);
+    });
+    ctx.stroke();
+  }
+
+  if(chartType === "candlestick"){
+    const spacing = (W-padL-padR)/(series.length || 1);
+    const bodyW = Math.max(2*dpr, Math.min(10*dpr, spacing*0.55));
+    series.forEach((s,i)=>{
+      const x = xOf(i);
+      const o = Number(s.open ?? s.close);
+      const c = Number(s.close);
+      const h = Number(s.high ?? Math.max(o,c));
+      const l = Number(s.low ?? Math.min(o,c));
+      const up = c >= o;
+      ctx.strokeStyle = up ? "#166534" : "#b91c1c";
+      ctx.fillStyle = up ? "#dcfce7" : "#fee2e2";
+      ctx.lineWidth = 1*dpr;
+
+      ctx.beginPath();
+      ctx.moveTo(x, yOf(h));
+      ctx.lineTo(x, yOf(l));
+      ctx.stroke();
+
+      const y1 = yOf(Math.max(o,c));
+      const y2 = yOf(Math.min(o,c));
+      const bh = Math.max(1.5*dpr, y2-y1);
+      ctx.fillRect(x-bodyW/2, y1, bodyW, bh);
+      ctx.strokeRect(x-bodyW/2, y1, bodyW, bh);
+    });
+  }else{
+    line(series.map(x=>x.close), "#111827", 2.2);
+  }
+
+  line(shortMa, "#2563eb", 1.4);
+  line(longMa, "#dc2626", 1.4);
+
+  ctx.fillStyle = "#111827";
+  ctx.font = `${13*dpr}px sans-serif`;
+  ctx.fillText(label, padL, 16*dpr);
+  ctx.fillStyle = "#111827"; ctx.fillText(chartType === "candlestick" ? "ローソク" : "価格", W-270*dpr, 18*dpr);
+  ctx.fillStyle = "#2563eb"; ctx.fillText(shortName, W-190*dpr, 18*dpr);
+  ctx.fillStyle = "#dc2626"; ctx.fillText(longName, W-105*dpr, 18*dpr);
+
+  // start/end date labels use lower row, month labels use upper row
+  const first = series[0]?.date || "";
+  const last = series[series.length-1]?.date || "";
+  ctx.fillStyle = "#6b7280";
+  ctx.font = `${10*dpr}px sans-serif`;
+  ctx.fillText(v22DayShort(first), padL, H-6*dpr);
+  const lastText = v22DayShort(last);
+  const lastW = ctx.measureText(lastText).width;
+  ctx.fillText(lastText, W-padR-lastW, H-6*dpr);
+}
+
+// Override quickFetchChartAndAnalyze to use v22DrawChart
+async function quickFetchChartAndAnalyze(){
+  if(window.v21Busy){
+    setInputOrText("quickChartStatus", "処理中");
+    return;
+  }
+  window.v21Busy = true;
+  try{
+    const days = document.getElementById("quickChartDays");
+    if(days) days.value = "365";
+    const auto = document.getElementById("quickChartAutoRefresh");
+    if(auto) auto.value = "する";
+    const corr = document.getElementById("quickChartCorrection");
+    if(corr) corr.value = "365日固定";
+
+    const target = resolveChartSymbol();
+    const interval = val("quickChartInterval") || "daily";
+    const chartType = val("quickChartType") || "candlestick";
+
+    setInputOrText("quickChartStatus", "取得中");
+    const daily = await v21Fetch365DailyBase(target);
+    const series = v21Aggregate(daily, interval);
+    if(!series.length) throw new Error("チャートデータが空");
+
+    lastChartSeries = series;
+    const analysis = v21Analyze(series, target, interval);
+    const label = `${target.label || target.symbol} ${v21IntervalLabel(interval)} ${chartType === "candlestick" ? "candlestick" : "line"} / ${analysis.p.shortName} / ${analysis.p.longName}`;
+    v22DrawChart(series, analysis.shortMa, analysis.longMa, label, analysis.p.shortName, analysis.p.longName, chartType);
+
+    const box = document.getElementById("quickTechResult");
+    if(box) box.textContent = analysis.text;
+
+    setInputOrText("quickChartStatus", "取得・分析完了");
+    saveAll();
+  }catch(e){
+    const msg = typeof sanitizeApiErrorMessage === "function" ? sanitizeApiErrorMessage(e.message) : e.message;
+    setInputOrText("quickChartStatus", "取得失敗");
+    const box = document.getElementById("quickTechResult");
+    if(box) box.textContent =
+`【結論】
+チャート取得・分析失敗
+
+【理由】
+${msg}
+
+【対処】
+・BTCなら時間を空けて再実行
+・株式/ETFならAlpha Vantage無料枠の回復後に再実行`;
+  }finally{
+    window.v21Busy = false;
+  }
+}
+
+
+// ===== v23: monthly axis fully fixed =====
+function v23MonthShort(dateStr){
+  const d = new Date(dateStr + "T00:00:00Z");
+  if(isNaN(d.getTime())) return "";
+  return `${String(d.getUTCFullYear()).slice(2)}/${String(d.getUTCMonth()+1).padStart(2,"0")}`;
+}
+
+function v23BuildMonthTicks(series, interval){
+  const ticks = [];
+  if(!series || !series.length) return ticks;
+  if(interval === 'monthly'){
+    series.forEach((s,i)=>{
+      ticks.push({index:i, label:v23MonthShort(s.date), month:s.date.slice(0,7)});
+    });
+    return ticks;
+  }
+  let lastMonth = '';
+  series.forEach((s,i)=>{
+    const month = s.date.slice(0,7);
+    if(month !== lastMonth){
+      ticks.push({index:i, label:v23MonthShort(s.date), month});
+      lastMonth = month;
+    }
+  });
+  return ticks;
+}
+
+function v23DrawChart(series, shortMa, longMa, label, shortName, longName, chartType, interval){
+  const canvas = document.getElementById('quickChartCanvas');
+  if(!canvas || !series.length) return;
+  const rect = canvas.getBoundingClientRect();
+  const dpr = window.devicePixelRatio || 1;
+  canvas.width = Math.max(600, Math.floor(rect.width * dpr));
+  canvas.height = Math.floor(390 * dpr);
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+  const padL = 62*dpr, padR = 22*dpr, padT = 26*dpr, padB = 42*dpr;
+  ctx.clearRect(0,0,W,H);
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(0,0,W,H);
+
+  const vals = [];
+  series.forEach(x=>{
+    vals.push(Number(x.close));
+    if(Number.isFinite(Number(x.high))) vals.push(Number(x.high));
+    if(Number.isFinite(Number(x.low))) vals.push(Number(x.low));
+  });
+  shortMa.forEach(x=>{ if(x!=null) vals.push(x); });
+  longMa.forEach(x=>{ if(x!=null) vals.push(x); });
+  let min = Math.min(...vals), max = Math.max(...vals);
+  const margin = (max-min)*0.08 || max*0.05 || 1;
+  min -= margin; max += margin;
+  const xOf = i => padL + (i/(series.length-1 || 1))*(W-padL-padR);
+  const yOf = v => padT + (max-v)/(max-min)*(H-padT-padB);
+
+  // horizontal grid
+  ctx.strokeStyle = '#e5e7eb';
+  ctx.lineWidth = 1*dpr;
+  ctx.font = `${11*dpr}px sans-serif`;
+  ctx.fillStyle = '#6b7280';
+  for(let g=0; g<=4; g++){
+    const y = padT + g*(H-padT-padB)/4;
+    ctx.beginPath(); ctx.moveTo(padL, y); ctx.lineTo(W-padR, y); ctx.stroke();
+    const val = max - g*(max-min)/4;
+    ctx.fillText(val.toFixed(2), 6*dpr, y+4*dpr);
+  }
+
+  // month ticks / separators : show EVERY month
+  const showMonth = !(document.getElementById('quickMonthLabels') && document.getElementById('quickMonthLabels').value === 'no');
+  const ticks = v23BuildMonthTicks(series, interval);
+  if(showMonth){
+    ctx.strokeStyle = '#f3f4f6';
+    ctx.fillStyle = '#6b7280';
+    ctx.font = `${10*dpr}px sans-serif`;
+    ticks.forEach((t, idx)=>{
+      const x = xOf(t.index);
+      // separator line at every month boundary except the very first one
+      if(idx > 0){
+        ctx.beginPath();
+        ctx.moveTo(x, padT);
+        ctx.lineTo(x, H-padB);
+        ctx.stroke();
+      }
+      // label centered between this month start and next month start / chart end
+      let nextX = (idx < ticks.length - 1) ? xOf(ticks[idx+1].index) : (W - padR);
+      let centerX = idx < ticks.length - 1 ? (x + nextX)/2 : (x + (W-padR))/2;
+      if(interval === 'monthly') centerX = x;
+      const tw = ctx.measureText(t.label).width;
+      let lx = centerX - tw/2;
+      lx = Math.max(padL, Math.min(W - padR - tw, lx));
+      ctx.fillText(t.label, lx, H - 8*dpr);
+    });
+  }
+
+  function line(data, color, width=2){
+    ctx.strokeStyle = color;
+    ctx.lineWidth = width*dpr;
+    ctx.beginPath();
+    let started = false;
+    data.forEach((v,i)=>{
+      if(v == null || !Number.isFinite(v)) return;
+      const x = xOf(i), y = yOf(v);
+      if(!started){ ctx.moveTo(x,y); started = true; }
+      else ctx.lineTo(x,y);
+    });
+    ctx.stroke();
+  }
+
+  if(chartType === 'candlestick'){
+    const spacing = (W-padL-padR)/(series.length || 1);
+    const bodyW = Math.max(2*dpr, Math.min(10*dpr, spacing*0.55));
+    series.forEach((s,i)=>{
+      const x = xOf(i);
+      const o = Number(s.open ?? s.close);
+      const c = Number(s.close);
+      const h = Number(s.high ?? Math.max(o,c));
+      const l = Number(s.low ?? Math.min(o,c));
+      const up = c >= o;
+      ctx.strokeStyle = up ? '#166534' : '#b91c1c';
+      ctx.fillStyle = up ? '#dcfce7' : '#fee2e2';
+      ctx.lineWidth = 1*dpr;
+      ctx.beginPath(); ctx.moveTo(x, yOf(h)); ctx.lineTo(x, yOf(l)); ctx.stroke();
+      const y1 = yOf(Math.max(o,c));
+      const y2 = yOf(Math.min(o,c));
+      const bh = Math.max(1.5*dpr, y2-y1);
+      ctx.fillRect(x-bodyW/2, y1, bodyW, bh);
+      ctx.strokeRect(x-bodyW/2, y1, bodyW, bh);
+    });
+  }else{
+    line(series.map(x=>x.close), '#111827', 2.2);
+  }
+
+  line(shortMa, '#2563eb', 1.4);
+  line(longMa, '#dc2626', 1.4);
+
+  ctx.fillStyle = '#111827';
+  ctx.font = `${13*dpr}px sans-serif`;
+  ctx.fillText(label, padL, 16*dpr);
+  ctx.fillStyle = '#111827'; ctx.fillText(chartType === 'candlestick' ? 'ローソク' : '価格', W-270*dpr, 18*dpr);
+  ctx.fillStyle = '#2563eb'; ctx.fillText(shortName, W-190*dpr, 18*dpr);
+  ctx.fillStyle = '#dc2626'; ctx.fillText(longName, W-105*dpr, 18*dpr);
+}
+
+async function quickFetchChartAndAnalyze(){
+  if(window.v21Busy){
+    setInputOrText('quickChartStatus', '処理中');
+    return;
+  }
+  window.v21Busy = true;
+  try{
+    const days = document.getElementById('quickChartDays');
+    if(days) days.value = '365';
+    const auto = document.getElementById('quickChartAutoRefresh');
+    if(auto) auto.value = 'する';
+    const corr = document.getElementById('quickChartCorrection');
+    if(corr) corr.value = '365日固定';
+
+    const target = resolveChartSymbol();
+    const interval = val('quickChartInterval') || 'daily';
+    const chartType = val('quickChartType') || 'candlestick';
+
+    setInputOrText('quickChartStatus', '取得中');
+    const daily = await v21Fetch365DailyBase(target);
+    const series = v21Aggregate(daily, interval);
+    if(!series.length) throw new Error('チャートデータが空');
+
+    lastChartSeries = series;
+    const analysis = v21Analyze(series, target, interval);
+    const label = `${target.label || target.symbol} ${v21IntervalLabel(interval)} ${chartType === 'candlestick' ? 'candlestick' : 'line'} / ${analysis.p.shortName} / ${analysis.p.longName}`;
+    v23DrawChart(series, analysis.shortMa, analysis.longMa, label, analysis.p.shortName, analysis.p.longName, chartType, interval);
+
+    const box = document.getElementById('quickTechResult');
+    if(box) box.textContent = analysis.text;
+
+    setInputOrText('quickChartStatus', '取得・分析完了');
+    saveAll();
+  }catch(e){
+    const msg = typeof sanitizeApiErrorMessage === 'function' ? sanitizeApiErrorMessage(e.message) : e.message;
+    setInputOrText('quickChartStatus', '取得失敗');
+    const box = document.getElementById('quickTechResult');
+    if(box) box.textContent =
+`【結論】
+チャート取得・分析失敗
+
+【理由】
+${msg}
+
+【対処】
+・BTCなら時間を空けて再実行
+・株式/ETFならAlpha Vantage無料枠の回復後に再実行`;
+  }finally{
+    window.v21Busy = false;
+  }
+}
+
+window.addEventListener("beforeunload", saveAll);
+loadDataFromStorage();
+document.getElementById("logDate").value = document.getElementById("logDate").value || todayString();
+if(document.getElementById("quickLogDate")) document.getElementById("quickLogDate").value = document.getElementById("quickLogDate").value || todayString();
+runAll();
+</script>
+</body>
+</html>
