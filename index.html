@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#111827">
   <link rel="manifest" href="./manifest.webmanifest">
-  <title>BTC・EDV確認 v5.2</title>
+  <title>BTC・EDV確認 v5.3</title>
   <style>
     :root{--bg:#f4f6f8;--card:#fff;--text:#111827;--muted:#6b7280;--line:#e5e7eb;--accent:#111827;--soft:#f9fafb;--ok:#dcfce7;--bad:#fee2e2}
     *{box-sizing:border-box}
@@ -36,8 +36,8 @@
 </head>
 <body>
 <header>
-  <h1>BTC・EDV確認 v5.2</h1>
-  <div class="sub">EDV平均取得単価・評価損益を追加。手入力のEDV価格とUSD/JPY欄は削除。</div>
+  <h1>BTC・EDV確認 v5.3</h1>
+  <div class="sub">EDV前日比を追加。評価損益・損益率も表示。</div>
 </header>
 <main>
 <section class="grid">
@@ -58,6 +58,10 @@
       <div class="pill" id="edvPriceView">EDV -</div>
       <div class="pill" id="usdJpyView">USD/JPY -</div>
       <div class="pill" id="us10yView">米10年 -</div>
+    </div>
+    <div class="row" style="margin-top:8px">
+      <div class="pill" id="edvDailyChangeView">前日比 -</div>
+      <div class="pill" id="edvDailyPctView">前日比率 -</div>
     </div>
     <div class="row" style="margin-top:8px">
       <div class="pill" id="edvCostView">取得元本 -</div>
@@ -97,9 +101,9 @@
 </main>
 
 <script>
-const STORAGE_KEY="btc_edv_minimal_v52";
-const OLD_KEYS=["btc_edv_minimal_v51","btc_edv_minimal_v5"];
-let state={btcPrice:null,btcAth:null,btcDrawdown:null,btc24h:null,edvPrice:null,edvPriceSource:"未取得",edvPriceUpdated:null,usdJpy:null,usdJpySource:"未取得",usdJpyUpdated:null,us10y:null,us10ySource:"未取得",us10yUpdated:null,btcUpdated:null,edvUpdated:null};
+const STORAGE_KEY="btc_edv_minimal_v53";
+const OLD_KEYS=["btc_edv_minimal_v52","btc_edv_minimal_v51","btc_edv_minimal_v5"];
+let state={btcPrice:null,btcAth:null,btcDrawdown:null,btc24h:null,edvPrice:null,edvChangeUsd:null,edvChangePct:null,edvPriceSource:"未取得",edvPriceUpdated:null,usdJpy:null,usdJpySource:"未取得",usdJpyUpdated:null,us10y:null,us10ySource:"未取得",us10yUpdated:null,btcUpdated:null,edvUpdated:null};
 let saveTimer=null;
 function $(id){return document.getElementById(id)}
 function val(id){return ($(id)?.value??"").trim()}
@@ -112,6 +116,7 @@ function fmtPct1(n){return Number.isFinite(Number(n))?(Number(n)>=0?"+":"")+Numb
 function now(){return new Date().toLocaleString("ja-JP",{hour12:false})}
 function setStatus(s){$("status").textContent=s}
 function headersCG(){const k=val("cgKey");return k?{"x-cg-demo-api-key":k}:{}}
+function parsePct(s){if(typeof s==="number")return s;if(!s)return null;const n=Number(String(s).replace("%",""));return Number.isFinite(n)?n:null}
 async function fetchJson(url,opt={}){
   const res=await fetch(url,opt);
   if(!res.ok) throw new Error("HTTP "+res.status);
@@ -146,7 +151,14 @@ async function fetchEDV(){
   let msgs=[];
   const q=(results[0].status==="fulfilled")?(results[0].value["Global Quote"]||{}):{};
   const p=Number(q["05. price"]);
-  if(Number.isFinite(p)&&p>0){state.edvPrice=p;state.edvPriceSource="今回取得";state.edvPriceUpdated=stamp;msgs.push("EDV価格OK");}
+  const ch=Number(q["09. change"]);
+  const chPct=parsePct(q["10. change percent"]);
+  if(Number.isFinite(p)&&p>0){
+    state.edvPrice=p;
+    if(Number.isFinite(ch)) state.edvChangeUsd=ch;
+    if(Number.isFinite(chPct)) state.edvChangePct=chPct;
+    state.edvPriceSource="今回取得";state.edvPriceUpdated=stamp;msgs.push("EDV価格OK");
+  }
   else{state.edvPriceSource=state.edvPrice?"前回値":"未取得";msgs.push("EDV価格NG: 前回値維持");}
   const r=(results[1].status==="fulfilled")?(results[1].value["Realtime Currency Exchange Rate"]||{}):{};
   const rate=Number(r["5. Exchange Rate"]);
@@ -166,16 +178,19 @@ function render(){
   $("btcUpdatedView").textContent=state.btcUpdated?"更新 "+state.btcUpdated:"未取得";
   const shares=num("edvShares")||382, edv=state.edvPrice, fx=state.usdJpy;
   const edvVal=edv&&fx?edv*fx*shares:null;
+  const dailyJpy=(state.edvChangeUsd!==null&&fx&&shares)?state.edvChangeUsd*fx*shares:null;
   const avg=num("edvAvgCostJPY"), cost=avg&&shares?avg*shares:null;
   const pl=edvVal&&cost?edvVal-cost:null, plPct=pl!==null&&cost?pl/cost*100:null;
   $("edvValueView").textContent=edvVal?fmtJPY(edvVal):"計算不可";
   $("edvPriceView").textContent="EDV "+fmtUSD(edv)+sourceMark(state.edvPriceSource);
   $("usdJpyView").textContent="USD/JPY "+(fx?Number(fx).toFixed(3):"-")+sourceMark(state.usdJpySource);
   $("us10yView").textContent="米10年 "+(state.us10y?Number(state.us10y).toFixed(3)+"%":"-")+sourceMark(state.us10ySource);
+  $("edvDailyChangeView").textContent="前日比 "+(dailyJpy!==null?fmtJPYNoSymbol(dailyJpy):"-");
+  $("edvDailyPctView").textContent="前日比率 "+fmtPct(state.edvChangePct);
   $("edvCostView").textContent="取得元本 "+(cost?fmtJPY(cost):"-");
   $("edvPlView").textContent="評価損益 "+(pl!==null?fmtJPYNoSymbol(pl):"-");
   $("edvPlPctView").textContent="損益率 "+(plPct!==null?fmtPct(plPct):"-");
-  ["edvPlView","edvPlPctView"].forEach(id=>{$(id).classList.remove("ok","bad");if(pl!==null)$(id).classList.add(pl>=0?"ok":"bad");});
+  const colored=[["edvPlView",pl],["edvPlPctView",plPct],["edvDailyChangeView",dailyJpy],["edvDailyPctView",state.edvChangePct]];colored.forEach(([id,v])=>{$(id).classList.remove("ok","bad");if(v!==null&&Number.isFinite(Number(v)))$(id).classList.add(Number(v)>=0?"ok":"bad");});
   const upd=[state.edvPriceUpdated?"EDV "+state.edvPriceUpdated:"",state.usdJpyUpdated?"USD/JPY "+state.usdJpyUpdated:"",state.us10yUpdated?"米10年 "+state.us10yUpdated:""].filter(Boolean).join(" / ");
   $("edvUpdatedView").textContent=upd||"未取得";
 }
