@@ -5,153 +5,121 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#111827">
   <link rel="manifest" href="./manifest.webmanifest">
-  <title>BTC・EDV確認 v5.1</title>
+  <title>BTC・EDV確認 v5.2</title>
   <style>
-    :root{
-      --bg:#f4f6f8; --card:#fff; --text:#111827; --muted:#6b7280; --line:#e5e7eb;
-      --accent:#111827; --soft:#f9fafb; --ok:#dcfce7; --warn:#fef3c7; --bad:#fee2e2;
-    }
+    :root{--bg:#f4f6f8;--card:#fff;--text:#111827;--muted:#6b7280;--line:#e5e7eb;--accent:#111827;--soft:#f9fafb;--ok:#dcfce7;--bad:#fee2e2}
     *{box-sizing:border-box}
-    body{
-      margin:0; background:var(--bg); color:var(--text);
-      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Hiragino Sans","Noto Sans JP",sans-serif;
-      line-height:1.5; padding-bottom:env(safe-area-inset-bottom);
-    }
-    header{
-      position:sticky; top:0; z-index:10; background:#111827; color:#fff;
-      padding:12px 14px; border-bottom:1px solid #0f172a;
-    }
-    h1{font-size:19px; margin:0}
-    .sub{font-size:12px; color:#cbd5e1; margin-top:3px}
-    main{max-width:980px; margin:0 auto; padding:10px}
-    .grid{display:grid; grid-template-columns:repeat(12,1fr); gap:10px}
-    .card{
-      background:var(--card); border:1px solid var(--line); border-radius:16px;
-      padding:12px; box-shadow:0 1px 2px rgba(0,0,0,.04);
-    }
-    .col-12{grid-column:span 12}.col-6{grid-column:span 6}.col-4{grid-column:span 4}.col-3{grid-column:span 3}
-    @media(max-width:760px){.col-6,.col-4,.col-3{grid-column:span 12} h1{font-size:18px}}
-    h2{font-size:16px; margin:0 0 8px}
-    label{display:block; font-size:12px; color:var(--muted); margin:8px 0 4px}
-    input,button{
-      width:100%; font:inherit; border-radius:10px; border:1px solid var(--line);
-      padding:10px; background:#fff; color:var(--text);
-    }
-    button{background:var(--accent); color:#fff; border:none; font-weight:700}
-    .btns{display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin:10px 0}
+    body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Hiragino Sans","Noto Sans JP",sans-serif;line-height:1.5;padding-bottom:env(safe-area-inset-bottom)}
+    header{position:sticky;top:0;z-index:10;background:#111827;color:#fff;padding:12px 14px;border-bottom:1px solid #0f172a}
+    h1{font-size:19px;margin:0}.sub{font-size:12px;color:#cbd5e1;margin-top:3px}
+    main{max-width:980px;margin:0 auto;padding:10px}
+    .grid{display:grid;grid-template-columns:repeat(12,1fr);gap:10px}
+    .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:12px;box-shadow:0 1px 2px rgba(0,0,0,.04)}
+    .col-12{grid-column:span 12}.col-6{grid-column:span 6}.col-4{grid-column:span 4}
+    @media(max-width:760px){.col-6,.col-4{grid-column:span 12}h1{font-size:18px}}
+    h2{font-size:16px;margin:0 0 8px}
+    label{display:block;font-size:12px;color:var(--muted);margin:8px 0 4px}
+    input,button{width:100%;font:inherit;border-radius:10px;border:1px solid var(--line);padding:10px;background:#fff;color:var(--text)}
+    button{background:var(--accent);color:#fff;border:none;font-weight:700}
+    .btns{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:10px 0}
     @media(max-width:760px){.btns{grid-template-columns:1fr}.btns button{font-size:14px}}
-    .metric{font-size:27px; font-weight:800; letter-spacing:.2px}
-    .small{font-size:12px; color:var(--muted)}
-    .box{border:1px solid var(--line); border-radius:12px; padding:10px; background:var(--soft); white-space:pre-wrap; font-size:13px}
-    .chart{height:460px; border:1px solid var(--line); border-radius:14px; overflow:hidden; background:#fff}
+    .metric{font-size:27px;font-weight:800;letter-spacing:.2px}
+    .small,.note{font-size:12px;color:var(--muted)}
+    .box{border:1px solid var(--line);border-radius:12px;padding:10px;background:var(--soft);white-space:pre-wrap;font-size:13px}
+    .chart{height:460px;border:1px solid var(--line);border-radius:14px;overflow:hidden;background:#fff}
     @media(max-width:760px){.chart{height:420px}}
-    details{border:1px solid var(--line); border-radius:14px; background:#fff; padding:10px}
-    summary{font-weight:700; cursor:pointer}
-    .note{font-size:12px; color:var(--muted)}
-    .row{display:flex; gap:8px; flex-wrap:wrap}
-    .pill{border:1px solid var(--line); background:#f9fafb; border-radius:999px; padding:5px 9px; font-size:13px}
-    .pill.ok{background:var(--ok); border-color:#bbf7d0}
-    .pill.warn{background:var(--warn); border-color:#fde68a}
-    .pill.bad{background:var(--bad); border-color:#fecaca}
+    details{border:1px solid var(--line);border-radius:14px;background:#fff;padding:10px}
+    summary{font-weight:700;cursor:pointer}
+    .row{display:flex;gap:8px;flex-wrap:wrap}.pill{border:1px solid var(--line);background:#f9fafb;border-radius:999px;padding:5px 9px;font-size:13px}
+    .pill.ok{background:var(--ok);border-color:#bbf7d0}.pill.bad{background:var(--bad);border-color:#fecaca}
   </style>
 </head>
 <body>
 <header>
-  <h1>BTC・EDV確認 v5.1</h1>
-  <div class="sub">取得失敗時は前回値を保持。¥0表示を廃止。</div>
+  <h1>BTC・EDV確認 v5.2</h1>
+  <div class="sub">EDV平均取得単価・評価損益を追加。手入力のEDV価格とUSD/JPY欄は削除。</div>
 </header>
-
 <main>
-  <section class="grid">
-    <div class="card col-6">
-      <h2>BTC</h2>
-      <div class="metric" id="btcPriceView">-</div>
-      <div class="row" style="margin-top:8px">
-        <div class="pill" id="btc24hView">24h -</div>
-        <div class="pill" id="btcDrawdownView">ATHから -</div>
+<section class="grid">
+  <div class="card col-6">
+    <h2>BTC</h2>
+    <div class="metric" id="btcPriceView">-</div>
+    <div class="row" style="margin-top:8px">
+      <div class="pill" id="btc24hView">24h -</div>
+      <div class="pill" id="btcDrawdownView">ATHから -</div>
+    </div>
+    <div class="small" id="btcUpdatedView" style="margin-top:8px">未取得</div>
+  </div>
+
+  <div class="card col-6">
+    <h2>EDV</h2>
+    <div class="metric" id="edvValueView">-</div>
+    <div class="row" style="margin-top:8px">
+      <div class="pill" id="edvPriceView">EDV -</div>
+      <div class="pill" id="usdJpyView">USD/JPY -</div>
+      <div class="pill" id="us10yView">米10年 -</div>
+    </div>
+    <div class="row" style="margin-top:8px">
+      <div class="pill" id="edvCostView">取得元本 -</div>
+      <div class="pill" id="edvPlView">評価損益 -</div>
+      <div class="pill" id="edvPlPctView">損益率 -</div>
+    </div>
+    <div class="small" id="edvUpdatedView" style="margin-top:8px">未取得</div>
+  </div>
+
+  <div class="card col-12">
+    <div class="btns">
+      <button onclick="fetchBTC()">BTC取得</button>
+      <button onclick="fetchEDV()">EDV取得</button>
+      <button onclick="fetchAll()">まとめて取得</button>
+    </div>
+    <div class="box" id="status">待機中</div>
+    <div class="note">取得失敗した項目は前回値を保持する。売買前は取引所・証券会社の価格、税金、家族資金、生活防衛資金を確認する。</div>
+  </div>
+
+  <div class="card col-12"><h2>BTCチャート</h2><div class="chart" id="btcChart"></div></div>
+  <div class="card col-12"><h2>EDVチャート</h2><div class="chart" id="edvChart"></div></div>
+
+  <div class="col-12">
+    <details>
+      <summary>設定</summary>
+      <div class="note" style="margin-top:8px">入力内容は自動保存。EDV評価損益は平均取得単価から計算。</div>
+      <div class="grid" style="margin-top:8px">
+        <div class="col-6"><label>Alpha Vantage API Key</label><input id="alphaKey" autocomplete="off"></div>
+        <div class="col-6"><label>CoinGecko Demo API Key 任意</label><input id="cgKey" autocomplete="off"></div>
+        <div class="col-4"><label>BTC過去最高値 USD</label><input id="btcAthManual" type="number" value="126000"></div>
+        <div class="col-4"><label>EDV保有株数</label><input id="edvShares" type="number" value="382"></div>
+        <div class="col-4"><label>EDV平均取得単価 円/株</label><input id="edvAvgCostJPY" type="number" step="1" placeholder="例 10659"></div>
       </div>
-      <div class="small" id="btcUpdatedView" style="margin-top:8px">未取得</div>
-    </div>
-
-    <div class="card col-6">
-      <h2>EDV</h2>
-      <div class="metric" id="edvValueView">-</div>
-      <div class="row" style="margin-top:8px">
-        <div class="pill" id="edvPriceView">EDV -</div>
-        <div class="pill" id="usdJpyView">USD/JPY -</div>
-        <div class="pill" id="us10yView">米10年 -</div>
-      </div>
-      <div class="small" id="edvUpdatedView" style="margin-top:8px">未取得</div>
-    </div>
-
-    <div class="card col-12">
-      <div class="btns">
-        <button onclick="fetchBTC()">BTC取得</button>
-        <button onclick="fetchEDV()">EDV取得</button>
-        <button onclick="fetchAll()">まとめて取得</button>
-      </div>
-      <div class="box" id="status">待機中</div>
-      <div class="note">取得失敗した項目は前回値を保持する。売買前は取引所・証券会社の価格、税金、家族資金、生活防衛資金を確認する。</div>
-    </div>
-
-    <div class="card col-12">
-      <h2>BTCチャート</h2>
-      <div class="chart" id="btcChart"></div>
-    </div>
-
-    <div class="card col-12">
-      <h2>EDVチャート</h2>
-      <div class="chart" id="edvChart"></div>
-    </div>
-
-    <div class="col-12">
-      <details>
-        <summary>設定</summary>
-        <div class="note" style="margin-top:8px">入力内容は自動保存。USD/JPY手入力は、API取得失敗時の予備。</div>
-        <div class="grid" style="margin-top:8px">
-          <div class="col-6"><label>Alpha Vantage API Key</label><input id="alphaKey" autocomplete="off"></div>
-          <div class="col-6"><label>CoinGecko Demo API Key 任意</label><input id="cgKey" autocomplete="off"></div>
-          <div class="col-3"><label>BTC過去最高値 USD</label><input id="btcAthManual" type="number" value="126000"></div>
-          <div class="col-3"><label>EDV保有株数</label><input id="edvShares" type="number" value="382"></div>
-          <div class="col-3"><label>EDV手入力価格 USD</label><input id="edvManualPrice" type="number" step="0.01"></div>
-          <div class="col-3"><label>USD/JPY手入力</label><input id="usdJpyManual" type="number" step="0.001"></div>
-        </div>
-      </details>
-    </div>
-  </section>
+    </details>
+  </div>
+</section>
 </main>
 
 <script>
-const STORAGE_KEY = "btc_edv_minimal_v51";
-let state = {
-  btcPrice:null, btcAth:null, btcDrawdown:null, btc24h:null,
-  edvPrice:null, edvPriceSource:"未取得", edvPriceUpdated:null,
-  usdJpy:null, usdJpySource:"未取得", usdJpyUpdated:null,
-  us10y:null, us10ySource:"未取得", us10yUpdated:null,
-  btcUpdated:null, edvUpdated:null
-};
-let saveTimer = null;
-
+const STORAGE_KEY="btc_edv_minimal_v52";
+const OLD_KEYS=["btc_edv_minimal_v51","btc_edv_minimal_v5"];
+let state={btcPrice:null,btcAth:null,btcDrawdown:null,btc24h:null,edvPrice:null,edvPriceSource:"未取得",edvPriceUpdated:null,usdJpy:null,usdJpySource:"未取得",usdJpyUpdated:null,us10y:null,us10ySource:"未取得",us10yUpdated:null,btcUpdated:null,edvUpdated:null};
+let saveTimer=null;
 function $(id){return document.getElementById(id)}
-function val(id){return ($(id)?.value ?? "").trim()}
-function num(id){const n=Number(val(id)); return Number.isFinite(n)?n:0}
-function fmtUSD(n){return Number.isFinite(Number(n)) ? "$" + Number(n).toLocaleString(undefined,{maximumFractionDigits:2}) : "-"}
-function fmtJPY(n){return Number.isFinite(Number(n)) ? "¥" + Math.round(Number(n)).toLocaleString() : "-"}
-function fmtPct(n){return Number.isFinite(Number(n)) ? (Number(n)>=0?"+":"") + Number(n).toFixed(2)+"%" : "-"}
-function fmtPct1(n){return Number.isFinite(Number(n)) ? (Number(n)>=0?"+":"") + Number(n).toFixed(1)+"%" : "-"}
+function val(id){return ($(id)?.value??"").trim()}
+function num(id){const n=Number(val(id));return Number.isFinite(n)?n:0}
+function fmtUSD(n){return Number.isFinite(Number(n))?"$"+Number(n).toLocaleString(undefined,{maximumFractionDigits:2}):"-"}
+function fmtJPY(n){return Number.isFinite(Number(n))?"¥"+Math.round(Number(n)).toLocaleString():"-"}
+function fmtJPYNoSymbol(n){return Number.isFinite(Number(n))?Math.round(Number(n)).toLocaleString()+"円":"-"}
+function fmtPct(n){return Number.isFinite(Number(n))?(Number(n)>=0?"+":"")+Number(n).toFixed(2)+"%":"-"}
+function fmtPct1(n){return Number.isFinite(Number(n))?(Number(n)>=0?"+":"")+Number(n).toFixed(1)+"%":"-"}
 function now(){return new Date().toLocaleString("ja-JP",{hour12:false})}
 function setStatus(s){$("status").textContent=s}
-
-function headersCG(){const k=val("cgKey"); return k?{"x-cg-demo-api-key":k}:{}}
+function headersCG(){const k=val("cgKey");return k?{"x-cg-demo-api-key":k}:{}}
 async function fetchJson(url,opt={}){
   const res=await fetch(url,opt);
   if(!res.ok) throw new Error("HTTP "+res.status);
   const data=await res.json();
-  if(data.Note || data.Information || data["Error Message"]) throw new Error(data.Note || data.Information || data["Error Message"]);
+  if(data.Note||data.Information||data["Error Message"]) throw new Error(data.Note||data.Information||data["Error Message"]);
   return data;
 }
-function calcDrawdown(p,ath){return p&&ath ? (Number(p)-Number(ath))/Number(ath)*100 : null}
-
+function calcDrawdown(p,ath){return p&&ath?(Number(p)-Number(ath))/Number(ath)*100:null}
 async function fetchBTC(){
   try{
     setStatus("BTC取得中");
@@ -162,193 +130,80 @@ async function fetchBTC(){
     state.btcDrawdown=md.ath_change_percentage?.usd??calcDrawdown(state.btcPrice,state.btcAth);
     state.btc24h=md.price_change_percentage_24h??state.btc24h;
     state.btcUpdated=now();
-    saveAll(false); render();
-    setStatus("BTC取得成功 " + state.btcUpdated);
-  }catch(e){
-    setStatus("BTC取得失敗。前回値を維持: "+e.message);
-    render();
-  }
+    saveAll(false);render();setStatus("BTC取得成功 "+state.btcUpdated);
+  }catch(e){setStatus("BTC取得失敗。前回値を維持: "+e.message);render();}
 }
-
 async function fetchEDV(){
   const key=val("alphaKey");
-  if(!key){
-    setStatus("EDV取得失敗: Alpha Vantage API Key未入力");
-    applyManualFallbacks(false);
-    render();
-    return;
-  }
-
+  if(!key){setStatus("EDV取得失敗: Alpha Vantage API Key未入力");render();return;}
   setStatus("EDV関連取得中");
-  const stamp = now();
-  const results = await Promise.allSettled([
+  const stamp=now();
+  const results=await Promise.allSettled([
     fetchJson(`https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=EDV&apikey=${encodeURIComponent(key)}`),
     fetchJson(`https://www.alphavantage.co/query?function=CURRENCY_EXCHANGE_RATE&from_currency=USD&to_currency=JPY&apikey=${encodeURIComponent(key)}`),
     fetchJson(`https://www.alphavantage.co/query?function=TREASURY_YIELD&interval=daily&maturity=10year&apikey=${encodeURIComponent(key)}`)
   ]);
-
   let msgs=[];
-  const edv = results[0];
-  const fx = results[1];
-  const yld = results[2];
-
-  if(edv.status==="fulfilled"){
-    const q=edv.value["Global Quote"]||{};
-    const p=Number(q["05. price"]);
-    if(Number.isFinite(p) && p>0){
-      state.edvPrice=p;
-      state.edvPriceSource="今回取得";
-      state.edvPriceUpdated=stamp;
-      msgs.push("EDV価格OK");
-    }else{
-      msgs.push("EDV価格NG: 前回値維持");
-    }
-  }else{
-    msgs.push("EDV価格NG: 前回値維持");
-  }
-
-  if(fx.status==="fulfilled"){
-    const r=fx.value["Realtime Currency Exchange Rate"]||{};
-    const rate=Number(r["5. Exchange Rate"]);
-    if(Number.isFinite(rate) && rate>0){
-      state.usdJpy=rate;
-      state.usdJpySource="今回取得";
-      state.usdJpyUpdated=stamp;
-      msgs.push("USD/JPY OK");
-    }else{
-      msgs.push("USD/JPY NG: 前回値維持");
-    }
-  }else{
-    msgs.push("USD/JPY NG: 前回値維持");
-  }
-
-  if(yld.status==="fulfilled"){
-    const arr=yld.value.data||[];
-    const latest = arr.length ? Number(arr[0].value) : NaN;
-    if(Number.isFinite(latest)){
-      state.us10y=latest;
-      state.us10ySource="今回取得";
-      state.us10yUpdated=stamp;
-      msgs.push("米10年OK");
-    }else{
-      msgs.push("米10年NG: 前回値維持");
-    }
-  }else{
-    msgs.push("米10年NG: 前回値維持");
-  }
-
-  applyManualFallbacks(true);
-  state.edvUpdated=stamp;
-  saveAll(false);
-  render();
-  setStatus(msgs.join(" / ")+" / "+stamp);
+  const q=(results[0].status==="fulfilled")?(results[0].value["Global Quote"]||{}):{};
+  const p=Number(q["05. price"]);
+  if(Number.isFinite(p)&&p>0){state.edvPrice=p;state.edvPriceSource="今回取得";state.edvPriceUpdated=stamp;msgs.push("EDV価格OK");}
+  else{state.edvPriceSource=state.edvPrice?"前回値":"未取得";msgs.push("EDV価格NG: 前回値維持");}
+  const r=(results[1].status==="fulfilled")?(results[1].value["Realtime Currency Exchange Rate"]||{}):{};
+  const rate=Number(r["5. Exchange Rate"]);
+  if(Number.isFinite(rate)&&rate>0){state.usdJpy=rate;state.usdJpySource="今回取得";state.usdJpyUpdated=stamp;msgs.push("USD/JPY OK");}
+  else{state.usdJpySource=state.usdJpy?"前回値":"未取得";msgs.push("USD/JPY NG: 前回値維持");}
+  const arr=(results[2].status==="fulfilled")?(results[2].value.data||[]):[]; 
+  const latest=arr.length?Number(arr[0].value):NaN;
+  if(Number.isFinite(latest)){state.us10y=latest;state.us10ySource="今回取得";state.us10yUpdated=stamp;msgs.push("米10年OK");}
+  else{state.us10ySource=state.us10y?"前回値":"未取得";msgs.push("米10年NG: 前回値維持");}
+  state.edvUpdated=stamp;saveAll(false);render();setStatus(msgs.join(" / ")+" / "+stamp);
 }
-
-function applyManualFallbacks(onlyIfBlank){
-  const edvManual=num("edvManualPrice");
-  const fxManual=num("usdJpyManual");
-
-  if(edvManual && (!onlyIfBlank || !state.edvPrice)){
-    if(!state.edvPrice){
-      state.edvPrice=edvManual;
-      state.edvPriceSource="手入力";
-      state.edvPriceUpdated=now();
-    }
-  }
-  if(fxManual && (!onlyIfBlank || !state.usdJpy)){
-    if(!state.usdJpy){
-      state.usdJpy=fxManual;
-      state.usdJpySource="手入力";
-      state.usdJpyUpdated=now();
-    }
-  }
-}
-
-async function fetchAll(){await fetchBTC(); await fetchEDV();}
-
+async function fetchAll(){await fetchBTC();await fetchEDV();}
 function render(){
   $("btcPriceView").textContent=fmtUSD(state.btcPrice);
-  $("btc24hView").textContent="24h " + fmtPct(state.btc24h);
-  $("btcDrawdownView").textContent="ATHから " + fmtPct1(state.btcDrawdown);
-  $("btcUpdatedView").textContent=state.btcUpdated ? "更新 " + state.btcUpdated : "未取得";
-
-  const shares=num("edvShares")||382;
-  const edv=state.edvPrice;
-  const fx=state.usdJpy;
+  $("btc24hView").textContent="24h "+fmtPct(state.btc24h);
+  $("btcDrawdownView").textContent="ATHから "+fmtPct1(state.btcDrawdown);
+  $("btcUpdatedView").textContent=state.btcUpdated?"更新 "+state.btcUpdated:"未取得";
+  const shares=num("edvShares")||382, edv=state.edvPrice, fx=state.usdJpy;
   const edvVal=edv&&fx?edv*fx*shares:null;
-
-  $("edvValueView").textContent=edvVal ? fmtJPY(edvVal) : "計算不可";
-  $("edvPriceView").textContent="EDV " + fmtUSD(edv) + sourceMark(state.edvPriceSource);
-  $("usdJpyView").textContent="USD/JPY " + (fx?Number(fx).toFixed(3):"-") + sourceMark(state.usdJpySource);
-  $("us10yView").textContent="米10年 " + (state.us10y?Number(state.us10y).toFixed(3)+"%":"-") + sourceMark(state.us10ySource);
-
-  const upd = [
-    state.edvPriceUpdated ? "EDV " + state.edvPriceUpdated : "",
-    state.usdJpyUpdated ? "USD/JPY " + state.usdJpyUpdated : "",
-    state.us10yUpdated ? "米10年 " + state.us10yUpdated : ""
-  ].filter(Boolean).join(" / ");
-  $("edvUpdatedView").textContent = upd || "未取得";
+  const avg=num("edvAvgCostJPY"), cost=avg&&shares?avg*shares:null;
+  const pl=edvVal&&cost?edvVal-cost:null, plPct=pl!==null&&cost?pl/cost*100:null;
+  $("edvValueView").textContent=edvVal?fmtJPY(edvVal):"計算不可";
+  $("edvPriceView").textContent="EDV "+fmtUSD(edv)+sourceMark(state.edvPriceSource);
+  $("usdJpyView").textContent="USD/JPY "+(fx?Number(fx).toFixed(3):"-")+sourceMark(state.usdJpySource);
+  $("us10yView").textContent="米10年 "+(state.us10y?Number(state.us10y).toFixed(3)+"%":"-")+sourceMark(state.us10ySource);
+  $("edvCostView").textContent="取得元本 "+(cost?fmtJPY(cost):"-");
+  $("edvPlView").textContent="評価損益 "+(pl!==null?fmtJPYNoSymbol(pl):"-");
+  $("edvPlPctView").textContent="損益率 "+(plPct!==null?fmtPct(plPct):"-");
+  ["edvPlView","edvPlPctView"].forEach(id=>{$(id).classList.remove("ok","bad");if(pl!==null)$(id).classList.add(pl>=0?"ok":"bad");});
+  const upd=[state.edvPriceUpdated?"EDV "+state.edvPriceUpdated:"",state.usdJpyUpdated?"USD/JPY "+state.usdJpyUpdated:"",state.us10yUpdated?"米10年 "+state.us10yUpdated:""].filter(Boolean).join(" / ");
+  $("edvUpdatedView").textContent=upd||"未取得";
 }
-
-function sourceMark(s){
-  if(!s || s==="未取得") return "";
-  if(s==="今回取得") return "（今回）";
-  if(s==="手入力") return "（手入力）";
-  return "（前回）";
-}
-
+function sourceMark(s){if(!s||s==="未取得")return "";if(s==="今回取得")return "（今回）";if(s==="手入力")return "（手入力）";return "（前回）";}
 function saveAll(show=true){
-  const settings={};
-  ["alphaKey","cgKey","btcAthManual","edvShares","edvManualPrice","usdJpyManual"].forEach(id=>settings[id]=val(id));
+  const settings={};["alphaKey","cgKey","btcAthManual","edvShares","edvAvgCostJPY"].forEach(id=>settings[id]=val(id));
   localStorage.setItem(STORAGE_KEY,JSON.stringify({state,settings}));
-  if(show) setStatus("自動保存 " + now());
+  if(show)setStatus("自動保存 "+now());
 }
-function scheduleSave(){
-  clearTimeout(saveTimer);
-  saveTimer = setTimeout(()=>{
-    saveAll(false);
-    render();
-    setStatus("自動保存 " + now());
-  }, 400);
-}
+function scheduleSave(){clearTimeout(saveTimer);saveTimer=setTimeout(()=>{saveAll(false);render();setStatus("自動保存 "+now());},250);}
 function loadAll(){
-  try{
-    const saved=JSON.parse(localStorage.getItem(STORAGE_KEY)||"{}");
-    if(saved.state) state=Object.assign(state,saved.state);
-    if(saved.settings) Object.entries(saved.settings).forEach(([id,v])=>{if($(id)) $(id).value=v});
-  }catch(e){}
-  applyManualFallbacks(true);
-  render();
-  renderCharts();
+  let loaded=null;try{loaded=JSON.parse(localStorage.getItem(STORAGE_KEY)||"null");}catch(e){}
+  if(!loaded){for(const key of OLD_KEYS){try{const old=JSON.parse(localStorage.getItem(key)||"null");if(old){loaded=old;break;}}catch(e){}}}
+  if(loaded){if(loaded.state)state=Object.assign(state,loaded.state);if(loaded.settings)Object.entries(loaded.settings).forEach(([id,v])=>{if($(id))$(id).value=v;});}
+  render();renderCharts();saveAll(false);
 }
-
-function renderCharts(){
-  renderTV("btcChart","BITSTAMP:BTCUSD");
-  renderTV("edvChart","AMEX:EDV");
-}
+function renderCharts(){renderTV("btcChart","BITSTAMP:BTCUSD");renderTV("edvChart","AMEX:EDV");}
 function renderTV(id,symbol){
-  const el=$(id); el.innerHTML="";
-  const wrap=document.createElement("div");
-  wrap.className="tradingview-widget-container"; wrap.style.height="100%"; wrap.style.width="100%";
-  const wid=document.createElement("div");
-  wid.className="tradingview-widget-container__widget"; wid.style.height="100%"; wid.style.width="100%";
-  wrap.appendChild(wid);
-  const s=document.createElement("script");
-  s.type="text/javascript"; s.async=true; s.src="https://s3.tradingview.com/external-embedding/embed-widget-advanced-chart.js";
-  s.innerHTML=JSON.stringify({
-    autosize:true, symbol, interval:"D", timezone:"Asia/Tokyo", theme:"light", style:"1", locale:"ja",
-    allow_symbol_change:false, calendar:false, hide_top_toolbar:false, hide_side_toolbar:false, support_host:"https://www.tradingview.com"
-  });
-  wrap.appendChild(s); el.appendChild(wrap);
+  const el=$(id);el.innerHTML="";
+  const wrap=document.createElement("div");wrap.className="tradingview-widget-container";wrap.style.height="100%";wrap.style.width="100%";
+  const wid=document.createElement("div");wid.className="tradingview-widget-container__widget";wid.style.height="100%";wid.style.width="100%";wrap.appendChild(wid);
+  const s=document.createElement("script");s.type="text/javascript";s.async=true;s.src="https://s3.tradingview.com/external-embedding/embed-widget-advanced-chart.js";
+  s.innerHTML=JSON.stringify({autosize:true,symbol,interval:"D",timezone:"Asia/Tokyo",theme:"light",style:"1",locale:"ja",allow_symbol_change:false,calendar:false,hide_top_toolbar:false,hide_side_toolbar:false,support_host:"https://www.tradingview.com"});
+  wrap.appendChild(s);el.appendChild(wrap);
 }
-
-function setupAutoSave(){
-  ["alphaKey","cgKey","btcAthManual","edvShares","edvManualPrice","usdJpyManual"]
-    .forEach(id=>{ if($(id)) $(id).addEventListener("input", scheduleSave); });
-}
+function setupAutoSave(){["alphaKey","cgKey","btcAthManual","edvShares","edvAvgCostJPY"].forEach(id=>{if($(id))$(id).addEventListener("input",scheduleSave);});}
 window.addEventListener("beforeunload",()=>saveAll(false));
-loadAll();
-setupAutoSave();
+loadAll();setupAutoSave();
 if("serviceWorker" in navigator){navigator.serviceWorker.register("./sw.js").catch(()=>{});}
 </script>
 </body>
