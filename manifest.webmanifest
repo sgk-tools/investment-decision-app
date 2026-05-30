@@ -1,6 +1,6 @@
 {
-  "name": "投資判断ログ・売買条件チェッカー",
-  "short_name": "投資判断",
+  "name": "BTC・EDV確認",
+  "short_name": "BTC-EDV",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#f4f6f8",

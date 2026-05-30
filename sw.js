@@ -1,4 +1,4 @@
-const CACHE_NAME = 'investment-decision-app-v23';
+const CACHE_NAME = 'btc-edv-minimal-v51';
 const ASSETS = ['./index.html','./manifest.webmanifest'];
 self.addEventListener('install', event => {
   event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(ASSETS)));
