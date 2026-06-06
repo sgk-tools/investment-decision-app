@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#111827">
   <link rel="manifest" href="./manifest.webmanifest">
-  <title>BTC・EDV確認 v5.3</title>
+  <title>BTC・EDV確認 v5.4</title>
   <style>
     :root{--bg:#f4f6f8;--card:#fff;--text:#111827;--muted:#6b7280;--line:#e5e7eb;--accent:#111827;--soft:#f9fafb;--ok:#dcfce7;--bad:#fee2e2}
     *{box-sizing:border-box}
@@ -21,6 +21,7 @@
     label{display:block;font-size:12px;color:var(--muted);margin:8px 0 4px}
     input,button{width:100%;font:inherit;border-radius:10px;border:1px solid var(--line);padding:10px;background:#fff;color:var(--text)}
     button{background:var(--accent);color:#fff;border:none;font-weight:700}
+    button:disabled{opacity:.65;cursor:not-allowed}
     .btns{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:10px 0}
     @media(max-width:760px){.btns{grid-template-columns:1fr}.btns button{font-size:14px}}
     .metric{font-size:27px;font-weight:800;letter-spacing:.2px}
@@ -36,8 +37,8 @@
 </head>
 <body>
 <header>
-  <h1>BTC・EDV確認 v5.3</h1>
-  <div class="sub">EDV前日比を追加。評価損益・損益率も表示。</div>
+  <h1>BTC・EDV確認 v5.4</h1>
+  <div class="sub">取得中表示と二重押し防止を追加。</div>
 </header>
 <main>
 <section class="grid">
@@ -73,9 +74,9 @@
 
   <div class="card col-12">
     <div class="btns">
-      <button onclick="fetchBTC()">BTC取得</button>
-      <button onclick="fetchEDV()">EDV取得</button>
-      <button onclick="fetchAll()">まとめて取得</button>
+      <button id="btcFetchBtn" onclick="fetchBTC()">BTC取得</button>
+      <button id="edvFetchBtn" onclick="fetchEDV()">EDV取得</button>
+      <button id="allFetchBtn" onclick="fetchAll()">まとめて取得</button>
     </div>
     <div class="box" id="status">待機中</div>
     <div class="note">取得失敗した項目は前回値を保持する。売買前は取引所・証券会社の価格、税金、家族資金、生活防衛資金を確認する。</div>
@@ -101,10 +102,13 @@
 </main>
 
 <script>
-const STORAGE_KEY="btc_edv_minimal_v53";
-const OLD_KEYS=["btc_edv_minimal_v52","btc_edv_minimal_v51","btc_edv_minimal_v5"];
+const STORAGE_KEY="btc_edv_minimal_v54";
+const OLD_KEYS=["btc_edv_minimal_v53","btc_edv_minimal_v52","btc_edv_minimal_v51","btc_edv_minimal_v5"];
 let state={btcPrice:null,btcAth:null,btcDrawdown:null,btc24h:null,edvPrice:null,edvChangeUsd:null,edvChangePct:null,edvPriceSource:"未取得",edvPriceUpdated:null,usdJpy:null,usdJpySource:"未取得",usdJpyUpdated:null,us10y:null,us10ySource:"未取得",us10yUpdated:null,btcUpdated:null,edvUpdated:null};
 let saveTimer=null;
+let isFetching=false;
+const FETCH_BUTTON_IDS=["btcFetchBtn","edvFetchBtn","allFetchBtn"];
+const FETCH_BUTTON_LABELS={btcFetchBtn:"BTC取得",edvFetchBtn:"EDV取得",allFetchBtn:"まとめて取得"};
 function $(id){return document.getElementById(id)}
 function val(id){return ($(id)?.value??"").trim()}
 function num(id){const n=Number(val(id));return Number.isFinite(n)?n:0}
@@ -115,6 +119,21 @@ function fmtPct(n){return Number.isFinite(Number(n))?(Number(n)>=0?"+":"")+Numbe
 function fmtPct1(n){return Number.isFinite(Number(n))?(Number(n)>=0?"+":"")+Number(n).toFixed(1)+"%":"-"}
 function now(){return new Date().toLocaleString("ja-JP",{hour12:false})}
 function setStatus(s){$("status").textContent=s}
+function setFetching(active,activeButtonId=null,label="取得中"){
+  FETCH_BUTTON_IDS.forEach(id=>{
+    const btn=$(id);
+    if(!btn)return;
+    btn.disabled=active;
+    btn.textContent=active&&id===activeButtonId?label:FETCH_BUTTON_LABELS[id];
+  });
+}
+async function withFetchLock(activeButtonId,label,task){
+  if(isFetching)return;
+  isFetching=true;
+  setFetching(true,activeButtonId,label);
+  try{await task();}
+  finally{isFetching=false;setFetching(false);}
+}
 function headersCG(){const k=val("cgKey");return k?{"x-cg-demo-api-key":k}:{}}
 function parsePct(s){if(typeof s==="number")return s;if(!s)return null;const n=Number(String(s).replace("%",""));return Number.isFinite(n)?n:null}
 async function fetchJson(url,opt={}){
@@ -125,7 +144,7 @@ async function fetchJson(url,opt={}){
   return data;
 }
 function calcDrawdown(p,ath){return p&&ath?(Number(p)-Number(ath))/Number(ath)*100:null}
-async function fetchBTC(){
+async function fetchBTCCore(){
   try{
     setStatus("BTC取得中");
     const data=await fetchJson("https://api.coingecko.com/api/v3/coins/bitcoin?localization=false&tickers=false&market_data=true&community_data=false&developer_data=false&sparkline=false",{headers:headersCG()});
@@ -138,7 +157,7 @@ async function fetchBTC(){
     saveAll(false);render();setStatus("BTC取得成功 "+state.btcUpdated);
   }catch(e){setStatus("BTC取得失敗。前回値を維持: "+e.message);render();}
 }
-async function fetchEDV(){
+async function fetchEDVCore(){
   const key=val("alphaKey");
   if(!key){setStatus("EDV取得失敗: Alpha Vantage API Key未入力");render();return;}
   setStatus("EDV関連取得中");
@@ -170,7 +189,9 @@ async function fetchEDV(){
   else{state.us10ySource=state.us10y?"前回値":"未取得";msgs.push("米10年NG: 前回値維持");}
   state.edvUpdated=stamp;saveAll(false);render();setStatus(msgs.join(" / ")+" / "+stamp);
 }
-async function fetchAll(){await fetchBTC();await fetchEDV();}
+async function fetchBTC(){await withFetchLock("btcFetchBtn","BTC取得中",fetchBTCCore);}
+async function fetchEDV(){await withFetchLock("edvFetchBtn","EDV取得中",fetchEDVCore);}
+async function fetchAll(){await withFetchLock("allFetchBtn","取得中",async()=>{await fetchBTCCore();await fetchEDVCore();});}
 function render(){
   $("btcPriceView").textContent=fmtUSD(state.btcPrice);
   $("btc24hView").textContent="24h "+fmtPct(state.btc24h);
